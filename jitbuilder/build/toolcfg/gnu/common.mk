@@ -101,7 +101,8 @@ CXX_FLAGS+=\
     -Wno-deprecated \
     -Wno-enum-compare \
     -Wno-invalid-offsetof \
-    -Wno-write-strings
+    -Wno-write-strings \
+    -D_GLIBCXX_DEBUG
 
 DEFAULT_OPTFLAG=-O3
 
