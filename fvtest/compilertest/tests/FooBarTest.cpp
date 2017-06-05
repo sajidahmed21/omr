@@ -18,6 +18,7 @@
 
 #include <limits.h>
 #include <stdio.h>
+#include <vector>
 #include "compile/Method.hpp"
 #include "ilgen/TypeDictionary.hpp"
 #include "OpCodesTest.hpp"
@@ -29,7 +30,6 @@
 
 namespace TestCompiler
 {
-
 
 FooMethodType  * FooBarTest::_foo = 0;
 BarMethodType  * FooBarTest::_bar = 0;
@@ -119,6 +119,29 @@ FooBarTest::invokeTests()
    OMR_CT_EXPECT_EQ(_foo, -1, _foo(INT_MIN));
    OMR_CT_EXPECT_EQ(_foo, -1, _foo(_dataArraySize));
    OMR_CT_EXPECT_EQ(_foo, -1, _foo(INT_MAX));
+
+
+   std::cout << "== VECTOR START ==" << std::endl;
+
+   std::vector<int> vec;
+
+   std::cout << "Vector size: " << vec.size() << std::endl;
+
+   for (int i = 0; i < 5; i++) {
+       vec.push_back(i);
+   }
+
+   std::cout << "Extended vector size: " << vec.size() << std::endl;
+
+   for (int i = 0; i < 5; i++) {
+       std::cout << "V[" << i << "] = " << vec[i] << std::endl;
+   }
+
+   std::cout << "== VECTOR END ==" << std::endl;
+
+   std::vector<int>::iterator it = vec.end();
+   it++;  // This should cause exception with checked STL
+
    }
 
 } // namespace TestCompiler

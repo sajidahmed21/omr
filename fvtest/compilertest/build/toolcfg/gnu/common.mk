@@ -104,7 +104,8 @@ CXX_FLAGS+=\
     -Wno-enum-compare \
     -Wno-invalid-offsetof \
     -Wno-write-strings \
-    -Wno-narrowing
+    -Wno-narrowing \
+    -D_GLIBCXX_DEBUG
 
 CX_DEFINES_DEBUG+=DEBUG
 CX_FLAGS_DEBUG+=-ggdb3
