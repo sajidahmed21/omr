@@ -102,6 +102,7 @@ CXX_FLAGS+=\
     -Wno-invalid-offsetof \
     -Wno-write-strings
 
+CXX_FLAGS_DEBUG+=-D_GLIBCXX_DEBUG
 CXX_FLAGS_PROD+=-fno-rtti
 
 DEFAULT_OPTFLAG=-O3
@@ -129,6 +130,7 @@ endif
 ifeq ($(BUILD_CONFIG),debug)
     CX_DEFINES+=DEBUG
     CX_FLAGS+=-ggdb3
+    CXX_FLAGS+=$(CXX_FLAGS_DEBUG)
     
     ifeq ($(PLATFORM),s390-linux-gcc)
         CX_FLAGS+=-gdwarf-2
