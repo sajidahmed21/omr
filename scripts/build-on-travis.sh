@@ -20,6 +20,7 @@
 set -evx
 
 export JOBS=4
+export BUILD_CONFIG=debug
 
 if test "x$BUILD_WITH_CMAKE" = "xyes"; then
   mkdir build
