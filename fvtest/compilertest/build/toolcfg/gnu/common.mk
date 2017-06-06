@@ -98,7 +98,6 @@ CX_FLAGS+=\
 
 CXX_FLAGS+=\
     -std=c++0x \
-    -fno-rtti \
     -fno-threadsafe-statics \
     -Wno-deprecated \
     -Wno-enum-compare \
@@ -112,6 +111,8 @@ CX_FLAGS_DEBUG+=-ggdb3
 CX_DEFAULTOPT=-O3
 CX_OPTFLAG?=$(CX_DEFAULTOPT)
 CX_FLAGS_PROD+=$(CX_OPTFLAG)
+
+CXX_FLAGS_PROD+=-fno-rtti
 
 ifeq ($(HOST_ARCH),x)
     ifeq ($(HOST_BITS),32)
@@ -164,6 +165,7 @@ endif
 ifeq ($(BUILD_CONFIG),prod)
     CX_DEFINES+=$(CX_DEFINES_PROD)
     CX_FLAGS+=$(CX_FLAGS_PROD)
+    CXX_FLAGS+=$(CXX_FLAGS_PROD)
 endif
 
 C_CMD?=$(CC_PATH)

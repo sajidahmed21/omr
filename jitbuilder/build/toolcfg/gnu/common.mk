@@ -96,12 +96,13 @@ CX_FLAGS+=\
 
 CXX_FLAGS+=\
     -std=c++0x \
-    -fno-rtti \
     -fno-threadsafe-statics \
     -Wno-deprecated \
     -Wno-enum-compare \
     -Wno-invalid-offsetof \
     -Wno-write-strings
+
+CXX_FLAGS_PROD+=-fno-rtti
 
 DEFAULT_OPTFLAG=-O3
 
@@ -115,6 +116,7 @@ endif
     
 ifeq ($(BUILD_CONFIG),prod)
     CX_OPTFLAG?=$(DEFAULT_OPTFLAG)
+    CXX_FLAGS+=$(CXX_FLAGS_PROD)
 
     ifeq ($(PLATFORM),ppc64-linux64-gcc)
         CX_FLAGS+=-mcpu=powerpc64
