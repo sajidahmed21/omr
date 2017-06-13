@@ -29,6 +29,7 @@
 
 #include <map>
 #include <set>
+#include <string>
 #include <fstream>
 #include "ilgen/IlBuilder.hpp"
 
@@ -73,7 +74,7 @@ class MethodBuilder : public TR::IlBuilder
 
    TR::TypeDictionary *typeDictionary()                      { return _types; }
 
-   const char *getDefiningFile()                             { return _definingFile; }
+   std::string getDefiningFile()                             { return _definingFile; }
    const char *getDefiningLine()                             { return _definingLine; }
 
    const char *getMethodName()                               { return _methodName; }
@@ -102,7 +103,7 @@ class MethodBuilder : public TR::IlBuilder
    void AppendBuilder(TR::BytecodeBuilder *bb);
    void AppendBuilder(TR::IlBuilder *b)    { this->OMR::IlBuilder::AppendBuilder(b); }
 
-   void DefineFile(const char *file)                         { _definingFile = file; }
+   void DefineFile(const std::string &file)                  { _definingFile = file; }
 
    void DefineLine(const char *line)
       {
@@ -119,20 +120,20 @@ class MethodBuilder : public TR::IlBuilder
    void DefineReturnType(TR::IlType *dt);
    void DefineLocal(const char *name, TR::IlType *dt);
    void DefineMemory(const char *name, TR::IlType *dt, void *location);
-   void DefineFunction(const char* const name,
-                       const char* const fileName,
-                       const char* const lineNumber,
-                       void           * entryPoint,
-                       TR::IlType     * returnType,
-                       int32_t          numParms,
+   void DefineFunction(const char* const    name,
+                       const std::string  & fileName,
+                       const char* const    lineNumber,
+                       void               * entryPoint,
+                       TR::IlType         * returnType,
+                       int32_t              numParms,
                        ...);
-   void DefineFunction(const char* const name,
-                       const char* const fileName,
-                       const char* const lineNumber,
-                       void           * entryPoint,
-                       TR::IlType     * returnType,
-                       int32_t          numParms,
-                       TR::IlType     ** parmTypes);
+   void DefineFunction(const char* const    name,
+                       const std::string  & fileName,
+                       const char* const    lineNumber,
+                       void               * entryPoint,
+                       TR::IlType         * returnType,
+                       int32_t              numParms,
+                       TR::IlType        ** parmTypes);
 
    /**
     * @brief will be called if a Call is issued to a function that has not yet been defined, provides a
@@ -190,7 +191,7 @@ class MethodBuilder : public TR::IlBuilder
 
    TR::IlType                                                ** _cachedParameterTypes;
    char                                                       * _cachedSignature;
-   const char                                                 * _definingFile;
+   std::string                                                  _definingFile;
    char                                                         _definingLine[MAX_LINE_NUM_LEN];
    TR::IlType                                                 * _cachedParameterTypesArray[10];
    char                                                         _cachedSignatureArray[100];

@@ -474,12 +474,12 @@ MethodBuilder::DefineReturnType(TR::IlType *dt)
    }
 
 void
-MethodBuilder::DefineFunction(const char* const name,
-                              const char* const fileName,
-                              const char* const lineNumber,
-                              void           * entryPoint,
-                              TR::IlType     * returnType,
-                              int32_t          numParms,
+MethodBuilder::DefineFunction(const char* const    name,
+                              const std::string  & fileName,
+                              const char* const    lineNumber,
+                              void               * entryPoint,
+                              TR::IlType         * returnType,
+                              int32_t              numParms,
                               ...)
    {
    TR::IlType **parmTypes = (TR::IlType **) malloc(numParms * sizeof(TR::IlType *));
@@ -495,16 +495,16 @@ MethodBuilder::DefineFunction(const char* const name,
    }
 
 void
-MethodBuilder::DefineFunction(const char* const name,
-                              const char* const fileName,
-                              const char* const lineNumber,
-                              void           * entryPoint,
-                              TR::IlType     * returnType,
-                              int32_t          numParms,
-                              TR::IlType     ** parmTypes)
+MethodBuilder::DefineFunction(const char* const    name,
+                              const std::string  & fileName,
+                              const char* const    lineNumber,
+                              void               * entryPoint,
+                              TR::IlType         * returnType,
+                              int32_t              numParms,
+                              TR::IlType        ** parmTypes)
    {   
    MB_REPLAY("DefineFunction((const char* const)\"%s\",", name);
-   MB_REPLAY("               (const char* const)\"%s\",", fileName);
+   MB_REPLAY("               (const std::string &)\"%s\",", fileName.c_str());
    MB_REPLAY("               (const char* const)\"%s\",", lineNumber);
    MB_REPLAY("               " REPLAY_POINTER_FMT ",", REPLAY_POINTER(entryPoint, name));
    MB_REPLAY("               %s,", REPLAY_TYPE(returnType));
@@ -518,7 +518,7 @@ MethodBuilder::DefineFunction(const char* const name,
       }   
    MB_REPLAY(");");
 
-   TR::ResolvedMethod *method = new (PERSISTENT_NEW) TR::ResolvedMethod((char*)fileName,
+   TR::ResolvedMethod *method = new (PERSISTENT_NEW) TR::ResolvedMethod(fileName,
                                                                         (char*)lineNumber,
                                                                         (char*)name,
                                                                         numParms,
