@@ -27,7 +27,9 @@
 
 #include <fstream>
 #include <stdarg.h>
-#include <string.h>
+#include <string.h>   // TODO: Remove
+#include <string>
+
 #include "ilgen/IlInjector.hpp"
 #include "il/ILHelpers.hpp"
 
@@ -231,10 +233,10 @@ public:
 
    // control
    void AppendBuilder(TR::IlBuilder *builder);
-   TR::IlValue *Call(const char *name, int32_t numArgs, ...);
-   TR::IlValue *Call(const char *name, int32_t numArgs, TR::IlValue **argValues);
-   TR::IlValue *ComputedCall(const char *name, int32_t numArgs, ...);
-   TR::IlValue *ComputedCall(const char *name, int32_t numArgs, TR::IlValue **args);
+   TR::IlValue *Call(const std::string &name, int32_t numArgs, ...);
+   TR::IlValue *Call(const std::string &name, int32_t numArgs, TR::IlValue **argValues);
+   TR::IlValue *ComputedCall(const std::string &name, int32_t numArgs, ...);
+   TR::IlValue *ComputedCall(const std::string &name, int32_t numArgs, TR::IlValue **args);
    TR::IlValue *genCall(TR::SymbolReference *methodSymRef, int32_t numArgs, TR::IlValue ** paramValues, bool isDirectCall = true);
    void Goto(TR::IlBuilder **dest);
    void Goto(TR::IlBuilder *dest);

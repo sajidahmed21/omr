@@ -17,6 +17,8 @@
  *******************************************************************************/
 
 #include <stdint.h>
+#include <string>
+
 #include "compile/Compilation.hpp"
 #include "ilgen/IlBuilder.hpp"
 #include "ilgen/ThunkBuilder.hpp"

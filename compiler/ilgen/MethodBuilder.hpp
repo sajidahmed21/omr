@@ -31,6 +31,7 @@
 #include <set>
 #include <string>
 #include <fstream>
+#include <string>
 #include "ilgen/IlBuilder.hpp"
 
 // Maximum length of _definingLine string (including null terminator)
@@ -77,7 +78,7 @@ class MethodBuilder : public TR::IlBuilder
    std::string getDefiningFile()                             { return _definingFile; }
    const char *getDefiningLine()                             { return _definingLine; }
 
-   const char *getMethodName()                               { return _methodName; }
+   std::string getMethodName()                               { return _methodName; }
    void AllLocalsHaveBeenDefined()                           { _newSymbolsAreTemps = true; }
 
    TR::IlType *getReturnType()                               { return _returnType; }
@@ -96,7 +97,7 @@ class MethodBuilder : public TR::IlBuilder
    bool symbolDefined(const char *name);
    bool isSymbolAnArray(const char * name);
 
-   TR::ResolvedMethod *lookupFunction(const char *name);
+   TR::ResolvedMethod *lookupFunction(const std::string &name);
 
    TR::BytecodeBuilder *OrphanBytecodeBuilder(int32_t bcIndex=0, char *name=NULL);
 
@@ -114,20 +115,20 @@ class MethodBuilder : public TR::IlBuilder
       snprintf(_definingLine, MAX_LINE_NUM_LEN * sizeof(char), "%d", line);
       }
 
-   void DefineName(const char *name);
+   void DefineName(const std::string &name);
    void DefineParameter(const char *name, TR::IlType *type);
    void DefineArrayParameter(const char *name, TR::IlType *dt);
    void DefineReturnType(TR::IlType *dt);
    void DefineLocal(const char *name, TR::IlType *dt);
    void DefineMemory(const char *name, TR::IlType *dt, void *location);
-   void DefineFunction(const char* const    name,
+   void DefineFunction(const std::string  & name,
                        const std::string  & fileName,
                        const char* const    lineNumber,
                        void               * entryPoint,
                        TR::IlType         * returnType,
                        int32_t              numParms,
                        ...);
-   void DefineFunction(const char* const    name,
+   void DefineFunction(const std::string  & name,
                        const std::string  & fileName,
                        const char* const    lineNumber,
                        void               * entryPoint,
@@ -141,7 +142,7 @@ class MethodBuilder : public TR::IlBuilder
     *        front via the constructor.
     * @returns true if the function was found and DefineFunction has been called for it, otherwise false
     */
-   virtual bool RequestFunction(const char *name) { return false; }
+   virtual bool RequestFunction(const std::string &name) { return false; }
 
    /**
     * @brief append the first bytecode builder object to this method
@@ -174,7 +175,7 @@ class MethodBuilder : public TR::IlBuilder
    private:
 
    // These values are typically defined outside of a compilation
-   const char                                                 * _methodName;
+   std::string                                                  _methodName;
    TR::IlType                                                 * _returnType;
    int32_t                                                      _numParameters;
 
@@ -186,7 +187,7 @@ class MethodBuilder : public TR::IlBuilder
    std::set<const char *, StrComparator>                        _symbolIsArray;
    std::map<const char *, void *, StrComparator>                _memoryLocations;
 
-   typedef std::map<const char *, TR::ResolvedMethod *, StrComparator> NameToFunctionMap;
+   typedef std::map<const std::string, TR::ResolvedMethod *>    NameToFunctionMap;
    NameToFunctionMap                                            _functions;
 
    TR::IlType                                                ** _cachedParameterTypes;

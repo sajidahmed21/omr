@@ -102,7 +102,7 @@ MethodBuilder::MethodBuilder(TR::TypeDictionary *types, OMR::VirtualMachineState
    _symbolNameFromSlot(),
    _symbolIsArray(str_comparator),
    _memoryLocations(str_comparator),
-   _functions(str_comparator),
+   _functions(),
    _symbols(str_comparator)
    {
 
@@ -375,14 +375,13 @@ MethodBuilder::lookupSymbol(const char *name)
    }
 
 TR::ResolvedMethod *
-MethodBuilder::lookupFunction(const char *name)
+MethodBuilder::lookupFunction(const std::string &name)
    {
    NameToFunctionMap::iterator it = _functions.find(name);
 
    if (it == _functions.end())  // Not found
       {
-      size_t len = strlen(name);
-      if (len == strlen(_methodName) && strncmp(_methodName, name, len) == 0)
+      if (name == _methodName)
          return static_cast<TR::ResolvedMethod *>(_methodSymbol->getResolvedMethod());
       return NULL;
       }
@@ -417,9 +416,9 @@ MethodBuilder::AppendBuilder(TR::BytecodeBuilder *bb)
    }
 
 void
-MethodBuilder::DefineName(const char *name)
+MethodBuilder::DefineName(const std::string &name)
    {
-   MB_REPLAY("DefineName(\"%s\");", name);
+   MB_REPLAY("DefineName(\"%s\");", name.c_str());
    _methodName = name;
    }
 
@@ -474,7 +473,7 @@ MethodBuilder::DefineReturnType(TR::IlType *dt)
    }
 
 void
-MethodBuilder::DefineFunction(const char* const    name,
+MethodBuilder::DefineFunction(const std::string  & name,
                               const std::string  & fileName,
                               const char* const    lineNumber,
                               void               * entryPoint,
@@ -495,7 +494,7 @@ MethodBuilder::DefineFunction(const char* const    name,
    }
 
 void
-MethodBuilder::DefineFunction(const char* const    name,
+MethodBuilder::DefineFunction(const std::string  & name,
                               const std::string  & fileName,
                               const char* const    lineNumber,
                               void               * entryPoint,
@@ -503,14 +502,14 @@ MethodBuilder::DefineFunction(const char* const    name,
                               int32_t              numParms,
                               TR::IlType        ** parmTypes)
    {   
-   MB_REPLAY("DefineFunction((const char* const)\"%s\",", name);
+   MB_REPLAY("DefineFunction((const char* const)\"%s\",", name.c_str());
    MB_REPLAY("               (const std::string &)\"%s\",", fileName.c_str());
    MB_REPLAY("               (const char* const)\"%s\",", lineNumber);
-   MB_REPLAY("               " REPLAY_POINTER_FMT ",", REPLAY_POINTER(entryPoint, name));
+   MB_REPLAY("               " REPLAY_POINTER_FMT ",", REPLAY_POINTER(entryPoint, name.c_str()));
    MB_REPLAY("               %s,", REPLAY_TYPE(returnType));
    MB_REPLAY_NONL("               %d", numParms);
 
-   TR_ASSERT_FATAL(_functions.find(name) == _functions.end(), "Function '%s' already defined", name);
+   TR_ASSERT_FATAL(_functions.find(name) == _functions.end(), "Function '%s' already defined", name.c_str());
 
    for (int32_t p=0;p < numParms;p++)
       {   
@@ -520,7 +519,7 @@ MethodBuilder::DefineFunction(const char* const    name,
 
    TR::ResolvedMethod *method = new (PERSISTENT_NEW) TR::ResolvedMethod(fileName,
                                                                         (char*)lineNumber,
-                                                                        (char*)name,
+                                                                        name,
                                                                         numParms,
                                                                         parmTypes,
                                                                         returnType,

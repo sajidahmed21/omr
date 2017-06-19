@@ -51,7 +51,7 @@ ResolvedMethod::ResolvedMethod(TR_OpaqueMethodBlock *method)
 ResolvedMethod::ResolvedMethod(TR::MethodBuilder *m)
    : _fileName(m->getDefiningFile()),
      _lineNumber(m->getDefiningLine()),
-     _name((char *)m->getMethodName()), // sad cast
+     _name(m->getMethodName()),
      _numParms(m->getNumParameters()),
      _parmTypes(m->getParameterTypes()),
      _returnType(m->getReturnType()),
@@ -67,10 +67,10 @@ ResolvedMethod::signature(TR_Memory * trMemory, TR_AllocationKind allocKind)
    {
    if( !_signature )
       {
-      char * s = (char *)trMemory->allocateMemory(_fileName.length() + 1 + strlen(_lineNumber) + 1 + strlen(_name) + 1, allocKind);
+      char * s = (char *)trMemory->allocateMemory(_fileName.length() + 1 + strlen(_lineNumber) + 1 + _name.length() + 1, allocKind);
 
       // TODO: Change this to use C++ string concatenation
-      sprintf(s, "%s:%s:%s", _fileName.c_str(), _lineNumber, _name);
+      sprintf(s, "%s:%s:%s", _fileName.c_str(), _lineNumber, _name.c_str());
 
       if ( allocKind == heapAlloc)
         _signature = s;

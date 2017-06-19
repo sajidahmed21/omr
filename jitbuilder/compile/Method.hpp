@@ -106,7 +106,7 @@ class ResolvedMethod : public ResolvedMethodBase, public Method
    ResolvedMethod(TR::MethodBuilder *methodBuilder);
    ResolvedMethod(const std::string  & fileName,
                   const char         * lineNumber,
-                  char               * name,
+                  const std::string  & name,
                   int32_t              numParms,
                   TR::IlType        ** parmTypes,
                   TR::IlType         * returnType,
@@ -131,7 +131,7 @@ class ResolvedMethod : public ResolvedMethodBase, public Method
    char                        * localName (uint32_t slot, uint32_t bcIndex, int32_t &nameLength, TR_Memory *trMemory);
 
    virtual char                * classNameChars()                           { return (char *) _fileName.c_str(); }
-   virtual char                * nameChars()                                { return _name; }
+   virtual char                * nameChars()                                { return (char *) _name.c_str(); }
    virtual char                * signatureChars()                           { return _signatureChars; }
    virtual uint16_t              signatureLength()                          { return strlen(signatureChars()); }
 
@@ -170,7 +170,7 @@ class ResolvedMethod : public ResolvedMethodBase, public Method
    std::string _fileName;
    const char *_lineNumber;
 
-   char *_name;
+   std::string _name;
    char *_signature;
    char _signatureChars[64];
 
@@ -197,7 +197,7 @@ namespace TR
 
          ResolvedMethod(const std::string  & fileName,
                         char               * lineNumber,
-                        char               * name,
+                        const std::string  & name,
                         int32_t              numArgs,
                         TR::IlType        ** parmTypes,
                         TR::IlType         * returnType,
