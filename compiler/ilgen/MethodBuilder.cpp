@@ -34,6 +34,7 @@
 #include "control/Recompilation.hpp"
 #include "infra/Cfg.hpp"
 #include "infra/HashTab.hpp"
+#include "infra/STLUtils.hpp"
 #include "infra/List.hpp"
 #include "ilgen/IlGeneratorMethodDetails_inlines.hpp"
 #include "ilgen/IlInjector.hpp"
@@ -143,7 +144,7 @@ MethodBuilder::initMaps()
    _symbolNameFromSlot = new (PERSISTENT_NEW) TR_HashTabInt(typeDictionary()->trMemory());
    _symbolIsArray = new (PERSISTENT_NEW) TR_HashTabString(typeDictionary()->trMemory());
    _memoryLocations = new (PERSISTENT_NEW) TR_HashTabString(typeDictionary()->trMemory());
-   _functions = new (PERSISTENT_NEW) TR_HashTabString(typeDictionary()->trMemory());
+   _functions = NameToFunctionMap(str_comparator);
    _symbols = new (PERSISTENT_NEW) TR_HashTabString(typeDictionary()->trMemory());
    }
 
@@ -382,8 +383,9 @@ MethodBuilder::lookupSymbol(const char *name)
 TR::ResolvedMethod *
 MethodBuilder::lookupFunction(const char *name)
    {
-   TR_HashId functionsID;
-   if (! _functions->locate(name, functionsID))
+   NameToFunctionMap::iterator it = _functions.find(name);
+
+   if (it == _functions.end())  // Not found
       {
       size_t len = strlen(name);
       if (len == strlen(_methodName) && strncmp(_methodName, name, len) == 0)
@@ -391,7 +393,7 @@ MethodBuilder::lookupFunction(const char *name)
       return NULL;
       }
 
-   return (TR::ResolvedMethod *)(_functions->getData(functionsID));
+   return it->second;
    }
 
 bool
@@ -533,8 +535,7 @@ MethodBuilder::DefineFunction(const char* const name,
                                                                         entryPoint,
                                                                         0);
 
-   TR_HashId functionsID;
-   _functions->add(name, functionsID, (void *)method);
+   _functions.insert(std::make_pair(name, method));
    }
 
 const char *

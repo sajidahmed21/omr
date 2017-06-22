@@ -27,6 +27,7 @@
 #endif
 
 
+#include <map>
 #include <fstream>
 #include "ilgen/IlBuilder.hpp"
 
@@ -182,7 +183,11 @@ class MethodBuilder : public TR::IlBuilder
    TR_HashTabInt             * _symbolNameFromSlot;
    TR_HashTabString          * _symbolIsArray;
    TR_HashTabString          * _memoryLocations;
-   TR_HashTabString          * _functions;
+
+   typedef bool (*StrComparator)(const char *, const char*);
+
+   typedef std::map<const char *, TR::ResolvedMethod *, StrComparator> NameToFunctionMap;
+   NameToFunctionMap           _functions;
 
    TR::IlType               ** _cachedParameterTypes;
    char                      * _cachedSignature;
