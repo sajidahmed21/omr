@@ -37,6 +37,7 @@
 #include "control/Recompilation.hpp"
 #include "infra/Cfg.hpp"
 #include "infra/HashTab.hpp"
+#include "infra/STLUtils.hpp"
 #include "infra/List.hpp"
 #include "ilgen/IlGeneratorMethodDetails_inlines.hpp"
 #include "ilgen/IlInjector.hpp"
@@ -98,7 +99,7 @@ MethodBuilder::MethodBuilder(TR::TypeDictionary *types, OMR::VirtualMachineState
    _symbolNameFromSlot(new (*_memoryRegion) TR_HashTabInt(_trMemory)),
    _symbolIsArray(new (*_memoryRegion) TR_HashTabString(_trMemory)),
    _memoryLocations(new (*_memoryRegion) TR_HashTabString(_trMemory)),
-   _functions(new (*_memoryRegion) TR_HashTabString(_trMemory)),
+   _functions(str_comparator, *_memoryRegion),
    _cachedParameterTypes(0),
    _cachedSignature(0),
    _definingFile(""),
@@ -146,6 +147,9 @@ MethodBuilder::MethodBuilder(const MethodBuilder &src) = default;
 
 MethodBuilder::~MethodBuilder()
    {
+   // Clear map contents before destroying the memory region to avoid dangling references
+   _functions.clear();
+
    _trMemory->~TR_Memory();
    ::operator delete(_trMemory, TR::Compiler->persistentAllocator());
    _memoryRegion->~Region();
@@ -395,8 +399,9 @@ MethodBuilder::lookupSymbol(const char *name)
 TR::ResolvedMethod *
 MethodBuilder::lookupFunction(const char *name)
    {
-   TR_HashId functionsID;
-   if (! _functions->locate(name, functionsID))
+   FunctionMap::iterator it = _functions.find(name);
+
+   if (it == _functions.end())  // Not found
       {
       size_t len = strlen(name);
       if (len == strlen(_methodName) && strncmp(_methodName, name, len) == 0)
@@ -404,7 +409,8 @@ MethodBuilder::lookupFunction(const char *name)
       return NULL;
       }
 
-   return (TR::ResolvedMethod *)(_functions->getData(functionsID));
+   TR::ResolvedMethod *method = it->second;
+   return method;
    }
 
 bool
@@ -546,8 +552,7 @@ MethodBuilder::DefineFunction(const char* const name,
                                                                         entryPoint,
                                                                         0);
 
-   TR_HashId functionsID;
-   _functions->add(name, functionsID, (void *)method);
+   _functions.insert(std::make_pair(name, method));
    }
 
 const char *
