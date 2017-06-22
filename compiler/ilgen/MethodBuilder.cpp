@@ -139,7 +139,7 @@ MethodBuilder::asMethodBuilder()
 void
 MethodBuilder::initMaps()
    {
-   _parameterSlot = new (PERSISTENT_NEW) TR_HashTabString(typeDictionary()->trMemory());
+   _parameterSlot = std::map<const char *, int32_t, StrComparator>(str_comparator);
    _symbolTypes = new (PERSISTENT_NEW) TR_HashTabString(typeDictionary()->trMemory());
    _symbolNameFromSlot = new (PERSISTENT_NEW) TR_HashTabInt(typeDictionary()->trMemory());
    _symbolIsArray = new (PERSISTENT_NEW) TR_HashTabString(typeDictionary()->trMemory());
@@ -358,11 +358,12 @@ MethodBuilder::lookupSymbol(const char *name)
 
    TR::DataType type = ((TR::IlType *)(_symbolTypes->getData(typesID)))->getPrimitiveType();
 
-   TR_HashId slotID;
-   if (_parameterSlot->locate(name, slotID))
+   std::map<const char *, int32_t>::iterator it = _parameterSlot.find(name);
+   if (it != _parameterSlot.end())
       {
+      int32_t slot = it->second;
       symRef = symRefTab()->findOrCreateAutoSymbol(_methodSymbol,
-                                                   (int32_t)(uintptr_t)_parameterSlot->getData(slotID),
+                                                   slot,
                                                    type,
                                                    true, false, true);
       }
@@ -453,8 +454,7 @@ void
 MethodBuilder::DefineParameter(const char *name, TR::IlType *dt)
    {
    MB_REPLAY("DefineParameter(\"%s\", %s);", name, REPLAY_TYPE(dt));
-   TR_HashId slotID;
-   _parameterSlot->add(name, slotID, (void *)(uintptr_t) _numParameters);
+   _parameterSlot.insert(std::make_pair(name, _numParameters));
 
    TR_HashId nameFromSlotID;
    _symbolNameFromSlot->add(_numParameters, nameFromSlotID, (void *) name);
