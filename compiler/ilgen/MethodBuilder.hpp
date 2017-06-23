@@ -175,44 +175,46 @@ class MethodBuilder : public TR::IlBuilder
    private:
 
    // These values are typically defined outside of a compilation
-   const char                     * _methodName;
-   TR::IlType                     * _returnType;
-   int32_t                          _numParameters;
-   std::map<const char *, int32_t>  _parameterSlot;
-   TR_HashTabString               * _symbolTypes;
-   TR_HashTabInt                  * _symbolNameFromSlot;
-   TR_HashTabString               * _symbolIsArray;
-   TR_HashTabString               * _memoryLocations;
+   const char                                         * _methodName;
+   TR::IlType                                         * _returnType;
+   int32_t                                              _numParameters;
 
    typedef bool (*StrComparator)(const char *, const char*);
+
+   std::map<const char *, int32_t, StrComparator>       _parameterSlot;
+   std::map<const char *, TR::IlType *, StrComparator>  _symbolTypes;
+   TR_HashTabInt                                      * _symbolNameFromSlot;
+   TR_HashTabString                                   * _symbolIsArray;
+   TR_HashTabString                                   * _memoryLocations;
+
 
    typedef std::map<const char *, TR::ResolvedMethod *, StrComparator> NameToFunctionMap;
    NameToFunctionMap                _functions;
 
-   TR::IlType                    ** _cachedParameterTypes;
-   char                           * _cachedSignature;
-   const char                     * _definingFile;
-   char                             _definingLine[MAX_LINE_NUM_LEN];
-   TR::IlType                     * _cachedParameterTypesArray[10];
-   char                             _cachedSignatureArray[100];
+   TR::IlType                                        ** _cachedParameterTypes;
+   char                                               * _cachedSignature;
+   const char                                         * _definingFile;
+   char                                                 _definingLine[MAX_LINE_NUM_LEN];
+   TR::IlType                                         * _cachedParameterTypesArray[10];
+   char                                                 _cachedSignatureArray[100];
 
    // This map should only be accessed inside a compilation via lookupSymbol
-   TR_HashTabString               * _symbols;
-   bool                             _newSymbolsAreTemps;
+   TR_HashTabString                                   * _symbols;
+   bool                                                 _newSymbolsAreTemps;
 
-   int32_t                          _nextValueID;
+   int32_t                                              _nextValueID;
 
-   bool                             _useBytecodeBuilders;
-   uint32_t                         _numBlocksBeforeWorklist;
-   List<TR::BytecodeBuilder>      * _countBlocksWorklist;
-   List<TR::BytecodeBuilder>      * _connectTreesWorklist;
-   List<TR::BytecodeBuilder>      * _allBytecodeBuilders;
-   OMR::VirtualMachineState       * _vmState;
+   bool                                                 _useBytecodeBuilders;
+   uint32_t                                             _numBlocksBeforeWorklist;
+   List<TR::BytecodeBuilder>                          * _countBlocksWorklist;
+   List<TR::BytecodeBuilder>                          * _connectTreesWorklist;
+   List<TR::BytecodeBuilder>                          * _allBytecodeBuilders;
+   OMR::VirtualMachineState                           * _vmState;
 
-   TR_BitVector                   * _bytecodeWorklist;
-   TR_BitVector                   * _bytecodeHasBeenInWorklist;
+   TR_BitVector                                       * _bytecodeWorklist;
+   TR_BitVector                                       * _bytecodeHasBeenInWorklist;
 
-   std::fstream                   * _rpCpp;
+   std::fstream                                       * _rpCpp;
    };
 
 } // namespace OMR
