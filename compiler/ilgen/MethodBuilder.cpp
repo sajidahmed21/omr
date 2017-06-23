@@ -88,7 +88,6 @@ MethodBuilder::MethodBuilder(TR::TypeDictionary *types, OMR::VirtualMachineState
    _cachedParameterTypes(0),
    _cachedSignature(0),
    _definingFile(""),
-   _symbols(0),
    _newSymbolsAreTemps(false),
    _nextValueID(0),
    _useBytecodeBuilders(false),
@@ -146,7 +145,7 @@ MethodBuilder::initMaps()
    _symbolIsArray = new (PERSISTENT_NEW) TR_HashTabString(typeDictionary()->trMemory());
    _memoryLocations = new (PERSISTENT_NEW) TR_HashTabString(typeDictionary()->trMemory());
    _functions = NameToFunctionMap(str_comparator);
-   _symbols = new (PERSISTENT_NEW) TR_HashTabString(typeDictionary()->trMemory());
+   _symbols = std::map<const char *, TR::SymbolReference *, StrComparator>(str_comparator);
    }
 
 void
@@ -335,10 +334,10 @@ MethodBuilder::symbolDefined(const char *name)
 void
 MethodBuilder::defineSymbol(const char *name, TR::SymbolReference *symRef)
    {
-   TR_HashId id1=0, id2=0;
+   _symbols.insert(std::make_pair(name, symRef));
 
-   _symbols->add(name, id1, (void *)symRef);
-   _symbolNameFromSlot->add(symRef->getCPIndex(), id2, (void *)name);
+   TR_HashId id=0;
+   _symbolNameFromSlot->add(symRef->getCPIndex(), id, (void *)name);
    
    TR::IlType *type = typeDictionary()->PrimitiveType(symRef->getSymbol()->getDataType());
    _symbolTypes.insert(std::make_pair(name, type));
@@ -350,10 +349,9 @@ MethodBuilder::defineSymbol(const char *name, TR::SymbolReference *symRef)
 TR::SymbolReference *
 MethodBuilder::lookupSymbol(const char *name)
    {
-   TR_HashId symbolsID=0;
-   bool present = _symbols->locate(name, symbolsID);
-   if (present)
-      return (TR::SymbolReference *)_symbols->getData(symbolsID);
+   std::map<const char *, TR::SymbolReference *, StrComparator>::iterator symbolsIterator = _symbols.find(name);
+   if (symbolsIterator != _symbols.end())  // Found
+      return symbolsIterator->second;
 
    TR::SymbolReference *symRef;
    std::map<const char *, TR::IlType *, StrComparator>::iterator symTypesIterator =  _symbolTypes.find(name);
@@ -380,7 +378,7 @@ MethodBuilder::lookupSymbol(const char *name)
       }
    symRef->getSymbol()->setNotCollected();
 
-   _symbols->add(name, symbolsID, (void *)symRef);
+   _symbols.insert(std::make_pair(name, symRef));
 
    return symRef;
    }
