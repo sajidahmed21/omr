@@ -186,7 +186,7 @@ class MethodBuilder : public TR::IlBuilder
    std::map<const char *, TR::IlType *, StrComparator>          _symbolTypes;
    TR_HashTabInt                                              * _symbolNameFromSlot;
    std::set<const char *, StrComparator>                        _symbolIsArray;
-   TR_HashTabString                                           * _memoryLocations;
+   std::map<const char *, void *, StrComparator>                _memoryLocations;
 
    typedef std::map<const char *, TR::ResolvedMethod *, StrComparator> NameToFunctionMap;
    NameToFunctionMap                                            _functions;
