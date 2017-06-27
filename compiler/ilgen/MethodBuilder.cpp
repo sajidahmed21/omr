@@ -143,7 +143,7 @@ MethodBuilder::initMaps()
    _symbolTypes = std::map<const char *, TR::IlType *, StrComparator>(str_comparator);
    _symbolNameFromSlot = new (PERSISTENT_NEW) TR_HashTabInt(typeDictionary()->trMemory());
    _symbolIsArray = std::set<const char *, StrComparator>(str_comparator);
-   _memoryLocations = new (PERSISTENT_NEW) TR_HashTabString(typeDictionary()->trMemory());
+   _memoryLocations = std::map<const char *, void *, StrComparator>(str_comparator);
    _functions = NameToFunctionMap(str_comparator);
    _symbols = std::map<const char *, TR::SymbolReference *, StrComparator>(str_comparator);
    }
@@ -444,8 +444,7 @@ MethodBuilder::DefineMemory(const char *name, TR::IlType *dt, void *location)
    MB_REPLAY("DefineMemory(\"%s\", %s, " REPLAY_POINTER_FMT ");", name, REPLAY_TYPE(dt), REPLAY_POINTER(location, name));
    _symbolTypes.insert(std::make_pair(name, dt));
 
-   TR_HashId locationsID;
-   _memoryLocations->add(name, locationsID, location);
+   _memoryLocations.insert(std::make_pair(name, location));
    }
 
 void
