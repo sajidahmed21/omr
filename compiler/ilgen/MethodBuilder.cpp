@@ -142,7 +142,7 @@ MethodBuilder::initMaps()
    _parameterSlot = std::map<const char *, int32_t, StrComparator>(str_comparator);
    _symbolTypes = std::map<const char *, TR::IlType *, StrComparator>(str_comparator);
    _symbolNameFromSlot = new (PERSISTENT_NEW) TR_HashTabInt(typeDictionary()->trMemory());
-   _symbolIsArray = new (PERSISTENT_NEW) TR_HashTabString(typeDictionary()->trMemory());
+   _symbolIsArray = std::set<const char *, StrComparator>(str_comparator);
    _memoryLocations = new (PERSISTENT_NEW) TR_HashTabString(typeDictionary()->trMemory());
    _functions = NameToFunctionMap(str_comparator);
    _symbols = std::map<const char *, TR::SymbolReference *, StrComparator>(str_comparator);
@@ -402,8 +402,7 @@ MethodBuilder::lookupFunction(const char *name)
 bool
 MethodBuilder::isSymbolAnArray(const char *name)
    {
-   TR_HashId isArrayID;
-   return _symbolIsArray->locate(name, isArrayID);
+   return _symbolIsArray.find(name) != _symbolIsArray.end();
    }
 
 TR::BytecodeBuilder *
@@ -470,9 +469,7 @@ MethodBuilder::DefineArrayParameter(const char *name, TR::IlType *elementType)
    MB_REPLAY("DefineArrayParameter(\"%s\", %s);", name, REPLAY_TYPE(elementType));
    DefineParameter(name, elementType);
 
-   TR_HashId isArrayID;
-   // doesn't actually matter what we put there; its presence says isArray
-   _symbolIsArray->add(name, isArrayID, (void *)(uintptr_t) 1);
+   _symbolIsArray.insert(name);
    }
 
 void

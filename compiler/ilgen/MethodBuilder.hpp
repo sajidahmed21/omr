@@ -28,6 +28,7 @@
 
 
 #include <map>
+#include <set>
 #include <fstream>
 #include "ilgen/IlBuilder.hpp"
 
@@ -184,7 +185,7 @@ class MethodBuilder : public TR::IlBuilder
    std::map<const char *, int32_t, StrComparator>               _parameterSlot;
    std::map<const char *, TR::IlType *, StrComparator>          _symbolTypes;
    TR_HashTabInt                                              * _symbolNameFromSlot;
-   TR_HashTabString                                           * _symbolIsArray;
+   std::set<const char *, StrComparator>                        _symbolIsArray;
    TR_HashTabString                                           * _memoryLocations;
 
    typedef std::map<const char *, TR::ResolvedMethod *, StrComparator> NameToFunctionMap;
