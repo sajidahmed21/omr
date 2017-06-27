@@ -141,7 +141,7 @@ MethodBuilder::initMaps()
    {
    _parameterSlot = std::map<const char *, int32_t, StrComparator>(str_comparator);
    _symbolTypes = std::map<const char *, TR::IlType *, StrComparator>(str_comparator);
-   _symbolNameFromSlot = new (PERSISTENT_NEW) TR_HashTabInt(typeDictionary()->trMemory());
+   _symbolNameFromSlot = std::map<int32_t, const char *>();
    _symbolIsArray = std::set<const char *, StrComparator>(str_comparator);
    _memoryLocations = std::map<const char *, void *, StrComparator>(str_comparator);
    _functions = NameToFunctionMap(str_comparator);
@@ -335,9 +335,7 @@ void
 MethodBuilder::defineSymbol(const char *name, TR::SymbolReference *symRef)
    {
    _symbols.insert(std::make_pair(name, symRef));
-
-   TR_HashId id=0;
-   _symbolNameFromSlot->add(symRef->getCPIndex(), id, (void *)name);
+   _symbolNameFromSlot.insert(std::make_pair(symRef->getCPIndex(), name));
    
    TR::IlType *type = typeDictionary()->PrimitiveType(symRef->getSymbol()->getDataType());
    _symbolTypes.insert(std::make_pair(name, type));
@@ -373,8 +371,7 @@ MethodBuilder::lookupSymbol(const char *name)
       {
       symRef = symRefTab()->createTemporary(_methodSymbol, type);
       symRef->getSymbol()->getAutoSymbol()->setName(name);
-      TR_HashId nameFromSlotID;
-      _symbolNameFromSlot->add(symRef->getCPIndex(), nameFromSlotID, (void *)name);
+      _symbolNameFromSlot.insert(std::make_pair(symRef->getCPIndex(), name));
       }
    symRef->getSymbol()->setNotCollected();
 
@@ -443,8 +440,8 @@ void
 MethodBuilder::DefineMemory(const char *name, TR::IlType *dt, void *location)
    {
    MB_REPLAY("DefineMemory(\"%s\", %s, " REPLAY_POINTER_FMT ");", name, REPLAY_TYPE(dt), REPLAY_POINTER(location, name));
-   _symbolTypes.insert(std::make_pair(name, dt));
 
+   _symbolTypes.insert(std::make_pair(name, dt));
    _memoryLocations.insert(std::make_pair(name, location));
    }
 
@@ -452,11 +449,9 @@ void
 MethodBuilder::DefineParameter(const char *name, TR::IlType *dt)
    {
    MB_REPLAY("DefineParameter(\"%s\", %s);", name, REPLAY_TYPE(dt));
+
    _parameterSlot.insert(std::make_pair(name, _numParameters));
-
-   TR_HashId nameFromSlotID;
-   _symbolNameFromSlot->add(_numParameters, nameFromSlotID, (void *) name);
-
+   _symbolNameFromSlot.insert(std::make_pair(_numParameters, name));
    _symbolTypes.insert(std::make_pair(name, dt));
 
    _numParameters++;
@@ -536,9 +531,9 @@ MethodBuilder::DefineFunction(const char* const name,
 const char *
 MethodBuilder::getSymbolName(int32_t slot)
    {
-   TR_HashId nameFromSlotID;
-   if (_symbolNameFromSlot->locate(slot, nameFromSlotID))
-      return (const char *)_symbolNameFromSlot->getData(nameFromSlotID);
+   std::map<int32_t, const char *>::iterator it = _symbolNameFromSlot.find(slot);
+   if (it != _symbolNameFromSlot.end())
+      return it->second;
    return NULL;
    }
 
@@ -552,15 +547,13 @@ MethodBuilder::getParameterTypes()
    TR::IlType **paramTypesArray = _cachedParameterTypesArray;
    for (int32_t p=0;p < _numParameters;p++)
       {
-      TR_HashId nameFromSlotID;
-      _symbolNameFromSlot->locate(p, nameFromSlotID);
-      const char *name = (const char *) _symbolNameFromSlot->getData(nameFromSlotID);
+      std::map<int32_t, const char *>::iterator symNamesIterator = _symbolNameFromSlot.find(p);
+      TR_ASSERT_FATAL(symNamesIterator != _symbolNameFromSlot.end(), "No symbol found in slot %d", p);
+      const char *name = symNamesIterator->second;
 
-      std::map<const char *, TR::IlType *, StrComparator>::iterator it = _symbolTypes.find(name);
-
-      TR_ASSERT_FATAL(it != _symbolTypes.end(), "No matching symbol type for parameter '%s'", name);
-
-      paramTypesArray[p] = it->second;
+      std::map<const char *, TR::IlType *, StrComparator>::iterator symTypesIterator = _symbolTypes.find(name);
+      TR_ASSERT_FATAL(symTypesIterator != _symbolTypes.end(), "No matching symbol type for parameter '%s'", name);
+      paramTypesArray[p] = symTypesIterator->second;
       }
 
    _cachedParameterTypes = paramTypesArray;

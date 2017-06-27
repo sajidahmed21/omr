@@ -35,8 +35,6 @@
 // Maximum length of _definingLine string (including null terminator)
 #define MAX_LINE_NUM_LEN 7
 
-class TR_HashTabInt;
-class TR_HashTabString;
 class TR_BitVector;
 namespace TR { class BytecodeBuilder; }
 namespace TR { class ResolvedMethod; }
@@ -184,7 +182,7 @@ class MethodBuilder : public TR::IlBuilder
 
    std::map<const char *, int32_t, StrComparator>               _parameterSlot;
    std::map<const char *, TR::IlType *, StrComparator>          _symbolTypes;
-   TR_HashTabInt                                              * _symbolNameFromSlot;
+   std::map<int32_t, const char *>                              _symbolNameFromSlot;
    std::set<const char *, StrComparator>                        _symbolIsArray;
    std::map<const char *, void *, StrComparator>                _memoryLocations;
 
