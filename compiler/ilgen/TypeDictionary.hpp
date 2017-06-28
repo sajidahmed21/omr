@@ -32,15 +32,16 @@
 #endif
 
 
+#include "map"
 #include "ilgen/IlBuilder.hpp"
 
+class TR_Memory;
 class TR_HashTabString;
 
-namespace TR { typedef TR::SymbolReference IlReference; }
-
-namespace TR { class SegmentProvider; }
-namespace TR { class Region; }
-class TR_Memory;
+namespace OMR { class StructType; }
+namespace TR  { class SegmentProvider; }
+namespace TR  { class Region; }
+namespace TR  { typedef TR::SymbolReference IlReference; }
 
 
 namespace OMR
@@ -415,46 +416,53 @@ public:
    void NotifyCompilationDone();
 
 protected:
-   TR::SegmentProvider *_segmentProvider;
-   TR::Region *_memoryRegion;
-   TR_Memory *_trMemory;
-   TR_HashTabString * _structsByName;
-   TR_HashTabString * _unionsByName;
+   TR::SegmentProvider                                    * _segmentProvider;
+   TR::Region                                             * _memoryRegion;
+   TR_Memory                                              * _trMemory;
+
+   typedef bool (*StrComparator)(const char *, const char *);
+
+   std::map<const char *, OMR::StructType *, StrComparator> _structsByName;
+   typedef std::map<const char *, OMR::StructType *, StrComparator>::iterator StructIterator;
+
+   TR_HashTabString                                       * _unionsByName;
 
    // convenience for primitive types
-   TR::IlType       * _primitiveType[TR::NumOMRTypes];
-   TR::IlType       * NoType;
-   TR::IlType       * Int8;
-   TR::IlType       * Int16;
-   TR::IlType       * Int32;
-   TR::IlType       * Int64;
-   TR::IlType       * Word;
-   TR::IlType       * Float;
-   TR::IlType       * Double;
-   TR::IlType       * Address;
-   TR::IlType       * VectorInt8;
-   TR::IlType       * VectorInt16;
-   TR::IlType       * VectorInt32;
-   TR::IlType       * VectorInt64;
-   TR::IlType       * VectorFloat;
-   TR::IlType       * VectorDouble;
+   TR::IlType                                             * _primitiveType[TR::NumOMRTypes];
+   TR::IlType                                             * NoType;
+   TR::IlType                                             * Int8;
+   TR::IlType                                             * Int16;
+   TR::IlType                                             * Int32;
+   TR::IlType                                             * Int64;
+   TR::IlType                                             * Word;
+   TR::IlType                                             * Float;
+   TR::IlType                                             * Double;
+   TR::IlType                                             * Address;
+   TR::IlType                                             * VectorInt8;
+   TR::IlType                                             * VectorInt16;
+   TR::IlType                                             * VectorInt32;
+   TR::IlType                                             * VectorInt64;
+   TR::IlType                                             * VectorFloat;
+   TR::IlType                                             * VectorDouble;
 
-   TR::IlType       * _pointerToPrimitiveType[TR::NumOMRTypes];
-   TR::IlType       * pNoType;
-   TR::IlType       * pInt8;
-   TR::IlType       * pInt16;
-   TR::IlType       * pInt32;
-   TR::IlType       * pInt64;
-   TR::IlType       * pWord;
-   TR::IlType       * pFloat;
-   TR::IlType       * pDouble;
-   TR::IlType       * pAddress;
-   TR::IlType       * pVectorInt8;
-   TR::IlType       * pVectorInt16;
-   TR::IlType       * pVectorInt32;
-   TR::IlType       * pVectorInt64;
-   TR::IlType       * pVectorFloat;
-   TR::IlType       * pVectorDouble;
+   TR::IlType                                             * _pointerToPrimitiveType[TR::NumOMRTypes];
+   TR::IlType                                             * pNoType;
+   TR::IlType                                             * pInt8;
+   TR::IlType                                             * pInt16;
+   TR::IlType                                             * pInt32;
+   TR::IlType                                             * pInt64;
+   TR::IlType                                             * pWord;
+   TR::IlType                                             * pFloat;
+   TR::IlType                                             * pDouble;
+   TR::IlType                                             * pAddress;
+   TR::IlType                                             * pVectorInt8;
+   TR::IlType                                             * pVectorInt16;
+   TR::IlType                                             * pVectorInt32;
+   TR::IlType                                             * pVectorInt64;
+   TR::IlType                                             * pVectorFloat;
+   TR::IlType                                             * pVectorDouble;
+
+   OMR::StructType * getStruct(const char *structName);
    };
 
 } // namespace OMR
