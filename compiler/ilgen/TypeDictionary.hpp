@@ -36,9 +36,9 @@
 #include "ilgen/IlBuilder.hpp"
 
 class TR_Memory;
-class TR_HashTabString;
 
 namespace OMR { class StructType; }
+namespace OMR { class UnionType; }
 namespace TR  { class SegmentProvider; }
 namespace TR  { class Region; }
 namespace TR  { typedef TR::SymbolReference IlReference; }
@@ -425,7 +425,8 @@ protected:
    std::map<const char *, OMR::StructType *, StrComparator> _structsByName;
    typedef std::map<const char *, OMR::StructType *, StrComparator>::iterator StructIterator;
 
-   TR_HashTabString                                       * _unionsByName;
+   std::map<const char *, OMR::UnionType *, StrComparator>  _unionsByName;
+   typedef std::map<const char *, OMR::UnionType *, StrComparator>::iterator  UnionIterator;
 
    // convenience for primitive types
    TR::IlType                                             * _primitiveType[TR::NumOMRTypes];
@@ -463,6 +464,7 @@ protected:
    TR::IlType                                             * pVectorDouble;
 
    OMR::StructType * getStruct(const char *structName);
+   OMR::UnionType  * getUnion(const char *unionName);
    };
 
 } // namespace OMR
