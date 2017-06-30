@@ -167,7 +167,6 @@ class MethodBuilder : public TR::IlBuilder
    int32_t GetNextBytecodeFromWorklist();
    
    protected:
-   void initMaps();
    virtual uint32_t countBlocks();
    virtual bool connectTrees();
 
@@ -179,6 +178,9 @@ class MethodBuilder : public TR::IlBuilder
    int32_t                                                      _numParameters;
 
    typedef bool (*StrComparator)(const char *, const char*);
+
+   // This map should only be accessed inside a compilation via lookupSymbol
+   std::map<const char *, TR::SymbolReference *, StrComparator> _symbols;
 
    std::map<const char *, int32_t, StrComparator>               _parameterSlot;
    std::map<const char *, TR::IlType *, StrComparator>          _symbolTypes;
@@ -196,10 +198,7 @@ class MethodBuilder : public TR::IlBuilder
    TR::IlType                                                 * _cachedParameterTypesArray[10];
    char                                                         _cachedSignatureArray[100];
 
-   // This map should only be accessed inside a compilation via lookupSymbol
-   std::map<const char *, TR::SymbolReference *, StrComparator> _symbols;
    bool                                                         _newSymbolsAreTemps;
-
    int32_t                                                      _nextValueID;
 
    bool                                                         _useBytecodeBuilders;

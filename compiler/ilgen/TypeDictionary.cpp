@@ -470,10 +470,10 @@ protected:
 TypeDictionary::TypeDictionary() :
    _segmentProvider( static_cast<TR::SegmentProvider *>(new(TR::Compiler->persistentAllocator()) TR::SystemSegmentProvider(1 << 16, TR::Compiler->rawAllocator)) ),
    _memoryRegion( new(TR::Compiler->persistentAllocator()) TR::Region(*_segmentProvider, TR::Compiler->rawAllocator) ),
-   _trMemory( new(TR::Compiler->persistentAllocator()) TR_Memory(*::trPersistentMemory, *_memoryRegion) )
+   _trMemory( new(TR::Compiler->persistentAllocator()) TR_Memory(*::trPersistentMemory, *_memoryRegion) ),
+   _structsByName(str_comparator),
+   _unionsByName(str_comparator)
    {
-   _structsByName = std::map<const char *, OMR::StructType *, StrComparator>(str_comparator);
-   _unionsByName  = std::map<const char *, OMR::UnionType *, StrComparator>(str_comparator);
 
    // primitive types
    NoType       = _primitiveType[TR::NoType]                = new (PERSISTENT_NEW) OMR::PrimitiveType("NoType", TR::NoType);
