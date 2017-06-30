@@ -167,7 +167,6 @@ class MethodBuilder : public TR::IlBuilder
    int32_t GetNextBytecodeFromWorklist();
    
    protected:
-   void initMaps();
    virtual uint32_t countBlocks();
    virtual bool connectTrees();
 

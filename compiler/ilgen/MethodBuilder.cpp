@@ -96,7 +96,14 @@ MethodBuilder::MethodBuilder(TR::TypeDictionary *types, OMR::VirtualMachineState
    _allBytecodeBuilders(0),
    _vmState(vmState),
    _bytecodeWorklist(NULL),
-   _bytecodeHasBeenInWorklist(NULL)
+   _bytecodeHasBeenInWorklist(NULL),
+   _parameterSlot(str_comparator),
+   _symbolTypes(str_comparator),
+   _symbolNameFromSlot(),
+   _symbolIsArray(str_comparator),
+   _memoryLocations(str_comparator),
+   _functions(str_comparator),
+   _symbols(str_comparator)
    {
 
    _definingLine[0] = '\0';
@@ -126,26 +133,12 @@ MethodBuilder::MethodBuilder(TR::TypeDictionary *types, OMR::VirtualMachineState
       strcpy(_replayName, "this");
       _haveReplayName = true;
    })
-
-   initMaps();
    }
 
 TR::MethodBuilder *
 MethodBuilder::asMethodBuilder()
    {
    return static_cast<TR::MethodBuilder *>(this);
-   }
-
-void
-MethodBuilder::initMaps()
-   {
-   _parameterSlot = std::map<const char *, int32_t, StrComparator>(str_comparator);
-   _symbolTypes = std::map<const char *, TR::IlType *, StrComparator>(str_comparator);
-   _symbolNameFromSlot = std::map<int32_t, const char *>();
-   _symbolIsArray = std::set<const char *, StrComparator>(str_comparator);
-   _memoryLocations = std::map<const char *, void *, StrComparator>(str_comparator);
-   _functions = NameToFunctionMap(str_comparator);
-   _symbols = std::map<const char *, TR::SymbolReference *, StrComparator>(str_comparator);
    }
 
 void
