@@ -740,13 +740,13 @@ IlBuilder::CreateLocalStruct(TR::IlType *structType)
    }
 
 void
-IlBuilder::StoreIndirect(const char *type, const char *field, TR::IlValue *object, TR::IlValue *value)
+IlBuilder::StoreIndirect(const std::string &type, const char *field, TR::IlValue *object, TR::IlValue *value)
   {
-  ILB_REPLAY("%s->StoreIndirect(\"%s\", \"%s\", %s, %s);", REPLAY_BUILDER(this), type, field, REPLAY_VALUE(object), REPLAY_VALUE(value));
+  ILB_REPLAY("%s->StoreIndirect(\"%s\", \"%s\", %s, %s);", REPLAY_BUILDER(this), type.c_str(), field, REPLAY_VALUE(object), REPLAY_VALUE(value));
 
   TR::SymbolReference *symRef = (TR::SymbolReference*)_types->FieldReference(type, field);
   TR::DataType fieldType = symRef->getSymbol()->getDataType();
-  TraceIL("IlBuilder[ %p ]::StoreIndirect %s.%s (%d) into (%d)\n", this, type, field, value->getID(), object->getID());
+  TraceIL("IlBuilder[ %p ]::StoreIndirect %s.%s (%d) into (%d)\n", this, type.c_str(), field, value->getID(), object->getID());
   TR::ILOpCodes storeOp = comp()->il.opCodeForIndirectStore(fieldType);
   genTreeTop(TR::Node::createWithSymRef(storeOp, 2, loadValue(object), loadValue(value), 0, symRef));
   }
@@ -776,13 +776,13 @@ IlBuilder::VectorLoad(const char *name)
    }
 
 TR::IlValue *
-IlBuilder::LoadIndirect(const char *type, const char *field, TR::IlValue *object)
+IlBuilder::LoadIndirect(const std::string &type, const char *field, TR::IlValue *object)
    {
    TR::SymbolReference *symRef = (TR::SymbolReference *)_types->FieldReference(type, field);
    TR::DataType fieldType = symRef->getSymbol()->getDataType();
    TR::IlValue *returnValue = newValue(fieldType, TR::Node::createWithSymRef(comp()->il.opCodeForIndirectLoad(fieldType), 1, loadValue(object), 0, symRef));
-   TraceIL("IlBuilder[ %p ]::%d is LoadIndirect %s.%s from (%d)\n", this, returnValue->getID(), type, field, object->getID());
-   ILB_REPLAY("%s = %s->LoadIndirect(%s, %s, %s);", REPLAY_VALUE(returnValue), REPLAY_BUILDER(this), type, field, REPLAY_VALUE(object));
+   TraceIL("IlBuilder[ %p ]::%d is LoadIndirect %s.%s from (%d)\n", this, returnValue->getID(), type.c_str(), field, object->getID());
+   ILB_REPLAY("%s = %s->LoadIndirect(%s, %s, %s);", REPLAY_VALUE(returnValue), REPLAY_BUILDER(this), type.c_str(), field, REPLAY_VALUE(object));
    return returnValue;
    }
 
@@ -860,7 +860,7 @@ IlBuilder::IndexAt(TR::IlType *dt, TR::IlValue *base, TR::IlValue *index)
  * a pointer to the type of the field.
  */
 TR::IlValue *
-IlBuilder::StructFieldInstanceAddress(const char* structName, const char* fieldName, TR::IlValue* obj) {
+IlBuilder::StructFieldInstanceAddress(const std::string &structName, const char* fieldName, TR::IlValue* obj) {
    auto offset = typeDictionary()->OffsetOf(structName, fieldName);
    auto ptype = typeDictionary()->PointerTo(typeDictionary()->GetFieldType(structName, fieldName));
    TR::IlValue* offsetValue = NULL;
@@ -883,7 +883,7 @@ IlBuilder::StructFieldInstanceAddress(const char* structName, const char* fieldN
  * offset of all union fields is zero.
  */
 TR::IlValue *
-IlBuilder::UnionFieldInstanceAddress(const char* unionName, const char* fieldName, TR::IlValue* obj) {
+IlBuilder::UnionFieldInstanceAddress(const std::string &unionName, const char* fieldName, TR::IlValue* obj) {
    auto ptype = typeDictionary()->PointerTo(typeDictionary()->UnionFieldType(unionName, fieldName));
    return ConvertTo(ptype, obj);
 }

@@ -30,7 +30,6 @@
 #include "env/TRMemory.hpp"
 #include "infra/Assert.hpp"
 #include "infra/BitVector.hpp"
-#include "infra/STLUtils.hpp"
 
 
 namespace OMR
@@ -54,7 +53,7 @@ IlType::getSignatureName()
    {
    TR::DataType dt = getPrimitiveType();
    if (dt == TR::Address)
-      return (char *)_name;
+      return (char *)_name.c_str();
    return (char *) signatureNameForType[dt];
    }
 
@@ -93,7 +92,7 @@ class PrimitiveType : public TR::IlType
 public:
    TR_ALLOC(TR_Memory::IlGenerator)
 
-   PrimitiveType(const char * name, TR::DataType type) :
+   PrimitiveType(const std::string &name, TR::DataType type) :
       TR::IlType(name),
       _type(type)
       { }
@@ -155,7 +154,7 @@ class StructType : public TR::IlType
 public:
    TR_ALLOC(TR_Memory::IlGenerator)
 
-   StructType(const char *name) :
+   StructType(const std::string &name) :
       TR::IlType(name),
       _firstField(0),
       _lastField(0),
@@ -166,7 +165,7 @@ public:
       { }
 
    TR::DataType getPrimitiveType()                 { return TR::Address; }
-   void Close(size_t finalSize)                      { TR_ASSERT(_size <= finalSize, "Final size %d of struct %s is less than its current size %d\n", finalSize, _name, _size); _size = finalSize; _closed = true; };
+   void Close(size_t finalSize)                      { TR_ASSERT(_size <= finalSize, "Final size %d of struct %s is less than its current size %d\n", finalSize, _name.c_str(), _size); _size = finalSize; _closed = true; };
    void Close()                                      { _closed = true; };
 
    void AddField(const char *name, TR::IlType *fieldType, size_t offset);
@@ -195,7 +194,7 @@ StructType::AddField(const char *name, TR::IlType *typeInfo, size_t offset)
    if (_closed)
       return;
 
-   TR_ASSERT(_size <= offset, "Offset of new struct field %s::%s is %d, which is less than the current size of the struct %d\n", _name, name, offset, _size);
+   TR_ASSERT(_size <= offset, "Offset of new struct field %s::%s is %d, which is less than the current size of the struct %d\n", _name.c_str(), name, offset, _size);
 
    FieldInfo *fieldInfo = new (PERSISTENT_NEW) FieldInfo(name, offset, typeInfo);
    if (0 != _lastField)
@@ -270,8 +269,8 @@ StructType::getFieldSymRef(const char *fieldName)
 
       TR::DataType type = info->getPrimitiveType();
 
-      char *fullName = (char *) comp->trMemory()->allocateHeapMemory((strlen(info->_name) + 1 + strlen(_name) + 1) * sizeof(char));
-      sprintf(fullName, "%s.%s", _name, info->_name);
+      char *fullName = (char *) comp->trMemory()->allocateHeapMemory((strlen(info->_name) + 1 + _name.length() + 1) * sizeof(char));
+      sprintf(fullName, "%s.%s", _name.c_str(), info->_name);
       TR::Symbol *symbol = TR::Symbol::createNamedShadow(comp->trHeapMemory(), type, info->_type->getSize(), fullName);
 
       // TBD: should we create a dynamic "constant" pool for accesses made by the method being compiled?
@@ -310,7 +309,7 @@ class UnionType : public TR::IlType
 public:
    TR_ALLOC(TR_Memory::IlGenerator)
 
-   UnionType(const char *name, TR_Memory* trMemory) :
+   UnionType(const std::string &name, TR_Memory* trMemory) :
       TR::IlType(name),
       _firstField(0),
       _lastField(0),
@@ -404,8 +403,8 @@ UnionType::getFieldSymRef(const char *fieldName)
       auto symRefTab = comp->getSymRefTab();
       TR::DataType type = info->getPrimitiveType();
 
-      char *fullName = (char *) comp->trMemory()->allocateHeapMemory((strlen(info->_name) + 1 + strlen(_name) + 1) * sizeof(char));
-      sprintf(fullName, "%s.%s", _name, info->_name);
+      char *fullName = (char *) comp->trMemory()->allocateHeapMemory((strlen(info->_name) + 1 + _name.length() + 1) * sizeof(char));
+      sprintf(fullName, "%s.%s", _name.c_str(), info->_name);
       TR::Symbol *symbol = TR::Symbol::createNamedShadow(comp->trHeapMemory(), type, info->_type->getSize(), fullName);
       symRef = new (comp->trHeapMemory()) TR::SymbolReference(symRefTab, symbol, comp->getMethodSymbol()->getResolvedMethodIndex(), -1);
       symRef->setOffset(0);
@@ -455,7 +454,7 @@ public:
 
    virtual TR::IlType *baseType() { return _baseType; }
 
-   virtual const char *getName() { return _name; }
+   virtual const char *getName() { return _name.c_str(); }
 
    virtual TR::DataType getPrimitiveType() { return TR::Address; }
 
@@ -471,8 +470,8 @@ TypeDictionary::TypeDictionary() :
    _segmentProvider( static_cast<TR::SegmentProvider *>(new(TR::Compiler->persistentAllocator()) TR::SystemSegmentProvider(1 << 16, TR::Compiler->rawAllocator)) ),
    _memoryRegion( new(TR::Compiler->persistentAllocator()) TR::Region(*_segmentProvider, TR::Compiler->rawAllocator) ),
    _trMemory( new(TR::Compiler->persistentAllocator()) TR_Memory(*::trPersistentMemory, *_memoryRegion) ),
-   _structsByName(str_comparator),
-   _unionsByName(str_comparator)
+   _structsByName(),
+   _unionsByName()
    {
 
    // primitive types
@@ -530,21 +529,21 @@ TypeDictionary::~TypeDictionary() throw()
    }
 
 TR::IlType *
-TypeDictionary::LookupStruct(const char *structName)
+TypeDictionary::LookupStruct(const std::string &structName)
    {
    return getStruct(structName);
    }
 
 TR::IlType *
-TypeDictionary::LookupUnion(const char *unionName)
+TypeDictionary::LookupUnion(const std::string &unionName)
    {
    return getUnion(unionName);
    }
 
 TR::IlType *
-TypeDictionary::DefineStruct(const char *structName)
+TypeDictionary::DefineStruct(const std::string &structName)
    {
-   TR_ASSERT_FATAL(_structsByName.find(structName) == _structsByName.end(), "Struct '%s' already exists", structName);
+   TR_ASSERT_FATAL(_structsByName.find(structName) == _structsByName.end(), "Struct '%s' already exists", structName.c_str());
 
    StructType *newType = new (PERSISTENT_NEW) StructType(structName);
    _structsByName.insert(std::make_pair(structName, newType));
@@ -553,45 +552,45 @@ TypeDictionary::DefineStruct(const char *structName)
    }
 
 void
-TypeDictionary::DefineField(const char *structName, const char *fieldName, TR::IlType *type, size_t offset)
+TypeDictionary::DefineField(const std::string &structName, const char *fieldName, TR::IlType *type, size_t offset)
    {
    getStruct(structName)->AddField(fieldName, type, offset);
    }
 
 void
-TypeDictionary::DefineField(const char *structName, const char *fieldName, TR::IlType *type)
+TypeDictionary::DefineField(const std::string &structName, const char *fieldName, TR::IlType *type)
    {
    getStruct(structName)->AddField(fieldName, type);
    }
 
 TR::IlType *
-TypeDictionary::GetFieldType(const char *structName, const char *fieldName)
+TypeDictionary::GetFieldType(const std::string &structName, const char *fieldName)
    {
    return getStruct(structName)->getFieldType(fieldName);
    }
 
 size_t
-TypeDictionary::OffsetOf(const char *structName, const char *fieldName)
+TypeDictionary::OffsetOf(const std::string &structName, const char *fieldName)
    {
    return getStruct(structName)->getFieldOffset(fieldName);
    }
 
 void
-TypeDictionary::CloseStruct(const char *structName, size_t finalSize)
+TypeDictionary::CloseStruct(const std::string &structName, size_t finalSize)
    {
    getStruct(structName)->Close(finalSize);
    }
 
 void
-TypeDictionary::CloseStruct(const char *structName)
+TypeDictionary::CloseStruct(const std::string &structName)
    {
    getStruct(structName)->Close();
    }
 
 TR::IlType *
-TypeDictionary::DefineUnion(const char *unionName)
+TypeDictionary::DefineUnion(const std::string &unionName)
    {
-   TR_ASSERT_FATAL(_unionsByName.find(unionName) == _unionsByName.end(), "Union '%s' already exists", unionName);
+   TR_ASSERT_FATAL(_unionsByName.find(unionName) == _unionsByName.end(), "Union '%s' already exists", unionName.c_str());
    
    UnionType *newType = new (PERSISTENT_NEW) UnionType(unionName, _trMemory);
    _unionsByName.insert(std::make_pair(unionName, newType));
@@ -600,25 +599,25 @@ TypeDictionary::DefineUnion(const char *unionName)
    }
 
 void
-TypeDictionary::UnionField(const char *unionName, const char *fieldName, TR::IlType *type)
+TypeDictionary::UnionField(const std::string &unionName, const char *fieldName, TR::IlType *type)
    {
    getUnion(unionName)->AddField(fieldName, type);
    }
 
 void
-TypeDictionary::CloseUnion(const char *unionName)
+TypeDictionary::CloseUnion(const std::string &unionName)
    {
    getUnion(unionName)->Close();
    }
 
 TR::IlType *
-TypeDictionary::UnionFieldType(const char *unionName, const char *fieldName)
+TypeDictionary::UnionFieldType(const std::string &unionName, const char *fieldName)
    {
    return getUnion(unionName)->getFieldType(fieldName);
    }
 
 TR::IlType *
-TypeDictionary::PointerTo(const char *structName)
+TypeDictionary::PointerTo(const std::string &structName)
    {
    return PointerTo(LookupStruct(structName));
    }
@@ -630,7 +629,7 @@ TypeDictionary::PointerTo(TR::IlType *baseType)
    }
 
 TR::IlReference *
-TypeDictionary::FieldReference(const char *typeName, const char *fieldName)
+TypeDictionary::FieldReference(const std::string &typeName, const char *fieldName)
    {
    StructIterator structIterator = _structsByName.find(typeName);
    bool found = structIterator != _structsByName.end();
@@ -648,7 +647,7 @@ TypeDictionary::FieldReference(const char *typeName, const char *fieldName)
       return theUnion->getFieldSymRef(fieldName);
       }
 
-   TR_ASSERT_FATAL(false, "No type with name `%s`", typeName);
+   TR_ASSERT_FATAL(false, "No type with name `%s`", typeName.c_str());
    return NULL;
    }
 
@@ -669,19 +668,19 @@ TypeDictionary::NotifyCompilationDone()
    }
 
 OMR::StructType *
-TypeDictionary::getStruct(const char *structName)
+TypeDictionary::getStruct(const std::string &structName)
    {
    StructIterator it = _structsByName.find(structName);
-   TR_ASSERT_FATAL(it != _structsByName.end(), "No struct named '%s'", structName);
+   TR_ASSERT_FATAL(it != _structsByName.end(), "No struct named '%s'", structName.c_str());
 
    return it->second;
    }
 
 OMR::UnionType *
-TypeDictionary::getUnion(const char *unionName)
+TypeDictionary::getUnion(const std::string &unionName)
    {
    UnionIterator it = _unionsByName.find(unionName);
-   TR_ASSERT_FATAL(it != _unionsByName.end(), "No union named '%s'", unionName);
+   TR_ASSERT_FATAL(it != _unionsByName.end(), "No union named '%s'", unionName.c_str());
 
    return it->second;
    }
