@@ -35,7 +35,6 @@
 #include "infra/Assert.hpp"
 #include "infra/Cfg.hpp"
 #include "infra/HashTab.hpp"
-#include "infra/STLUtils.hpp"
 #include "infra/List.hpp"
 #include "ilgen/IlGeneratorMethodDetails_inlines.hpp"
 #include "ilgen/IlInjector.hpp"
@@ -97,13 +96,13 @@ MethodBuilder::MethodBuilder(TR::TypeDictionary *types, OMR::VirtualMachineState
    _vmState(vmState),
    _bytecodeWorklist(NULL),
    _bytecodeHasBeenInWorklist(NULL),
-   _parameterSlot(str_comparator),
-   _symbolTypes(str_comparator),
+   _parameterSlot(),
+   _symbolTypes(),
    _symbolNameFromSlot(),
-   _symbolIsArray(str_comparator),
-   _memoryLocations(str_comparator),
+   _symbolIsArray(),
+   _memoryLocations(),
    _functions(),
-   _symbols(str_comparator)
+   _symbols()
    {
 
    _definingLine[0] = '\0';
@@ -313,7 +312,7 @@ MethodBuilder::connectTrees()
    }
 
 bool
-MethodBuilder::symbolDefined(const char *name)
+MethodBuilder::symbolDefined(const std::string &name)
    {
    // _symbols not good enough because symbol can be defined even if it has
    // never been stored to, but _symbolTypes will contain all symbols, even
@@ -325,9 +324,9 @@ MethodBuilder::symbolDefined(const char *name)
    }
 
 void
-MethodBuilder::defineSymbol(const char *name, TR::SymbolReference *symRef)
+MethodBuilder::defineSymbol(const std::string &name, TR::SymbolReference *symRef)
    {
-   TR_ASSERT_FATAL(_symbols.find(name) == _symbols.end(), "Symbol '%s' already defined", name);
+   TR_ASSERT_FATAL(_symbols.find(name) == _symbols.end(), "Symbol '%s' already defined", name.c_str());
 
    _symbols.insert(std::make_pair(name, symRef));
    _symbolNameFromSlot.insert(std::make_pair(symRef->getCPIndex(), name));
@@ -342,18 +341,20 @@ MethodBuilder::defineSymbol(const char *name, TR::SymbolReference *symRef)
 TR::SymbolReference *
 MethodBuilder::lookupSymbol(const char *name)
    {
-   std::map<const char *, TR::SymbolReference *, StrComparator>::iterator symbolsIterator = _symbols.find(name);
+   const std::string stdName(name);
+
+   std::map<const std::string, TR::SymbolReference *>::iterator symbolsIterator = _symbols.find(stdName);
    if (symbolsIterator != _symbols.end())  // Found
       return symbolsIterator->second;
 
    TR::SymbolReference *symRef;
-   std::map<const char *, TR::IlType *, StrComparator>::iterator symTypesIterator =  _symbolTypes.find(name);
+   std::map<const std::string, TR::IlType *>::iterator symTypesIterator =  _symbolTypes.find(stdName);
 
    TR_ASSERT_FATAL(symTypesIterator != _symbolTypes.end(), "Symbol '%s' doesn't exist", name);
 
    TR::DataType type = symTypesIterator->second->getPrimitiveType();
 
-   std::map<const char *, int32_t, StrComparator>::iterator paramSlotsIterator = _parameterSlot.find(name);
+   std::map<const std::string, int32_t>::iterator paramSlotsIterator = _parameterSlot.find(stdName);
    if (paramSlotsIterator != _parameterSlot.end())
       {
       symRef = symRefTab()->findOrCreateAutoSymbol(_methodSymbol,
@@ -365,11 +366,11 @@ MethodBuilder::lookupSymbol(const char *name)
       {
       symRef = symRefTab()->createTemporary(_methodSymbol, type);
       symRef->getSymbol()->getAutoSymbol()->setName(name);
-      _symbolNameFromSlot.insert(std::make_pair(symRef->getCPIndex(), name));
+      _symbolNameFromSlot.insert(std::make_pair(symRef->getCPIndex(), stdName));
       }
    symRef->getSymbol()->setNotCollected();
 
-   _symbols.insert(std::make_pair(name, symRef));
+   _symbols.insert(std::make_pair(stdName, symRef));
 
    return symRef;
    }
@@ -390,7 +391,7 @@ MethodBuilder::lookupFunction(const std::string &name)
    }
 
 bool
-MethodBuilder::isSymbolAnArray(const char *name)
+MethodBuilder::isSymbolAnArray(const std::string &name)
    {
    return _symbolIsArray.find(name) != _symbolIsArray.end();
    }
@@ -423,31 +424,31 @@ MethodBuilder::DefineName(const std::string &name)
    }
 
 void
-MethodBuilder::DefineLocal(const char *name, TR::IlType *dt)
+MethodBuilder::DefineLocal(const std::string &name, TR::IlType *dt)
    {
-   MB_REPLAY("DefineLocal(\"%s\", %s);", name, REPLAY_TYPE(dt));
+   MB_REPLAY("DefineLocal(\"%s\", %s);", name.c_str(), REPLAY_TYPE(dt));
 
-   TR_ASSERT_FATAL(_symbolTypes.find(name) == _symbolTypes.end(), "Symbol '%s' already defined", name);
+   TR_ASSERT_FATAL(_symbolTypes.find(name) == _symbolTypes.end(), "Symbol '%s' already defined", name.c_str());
    _symbolTypes.insert(std::make_pair(name, dt));
    }
 
 void
-MethodBuilder::DefineMemory(const char *name, TR::IlType *dt, void *location)
+MethodBuilder::DefineMemory(const std::string &name, TR::IlType *dt, void *location)
    {
-   MB_REPLAY("DefineMemory(\"%s\", %s, " REPLAY_POINTER_FMT ");", name, REPLAY_TYPE(dt), REPLAY_POINTER(location, name));
+   MB_REPLAY("DefineMemory(\"%s\", %s, " REPLAY_POINTER_FMT ");", name.c_str(), REPLAY_TYPE(dt), REPLAY_POINTER(location, name.c_str()));
 
-   TR_ASSERT_FATAL(_memoryLocations.find(name) == _memoryLocations.end(), "Memory '%s' already defined", name);
+   TR_ASSERT_FATAL(_memoryLocations.find(name) == _memoryLocations.end(), "Memory '%s' already defined", name.c_str());
 
    _symbolTypes.insert(std::make_pair(name, dt));
    _memoryLocations.insert(std::make_pair(name, location));
    }
 
 void
-MethodBuilder::DefineParameter(const char *name, TR::IlType *dt)
+MethodBuilder::DefineParameter(const std::string &name, TR::IlType *dt)
    {
-   MB_REPLAY("DefineParameter(\"%s\", %s);", name, REPLAY_TYPE(dt));
+   MB_REPLAY("DefineParameter(\"%s\", %s);", name.c_str(), REPLAY_TYPE(dt));
 
-   TR_ASSERT_FATAL(_parameterSlot.find(name) == _parameterSlot.end(), "Parameter '%s' already defined", name);
+   TR_ASSERT_FATAL(_parameterSlot.find(name) == _parameterSlot.end(), "Parameter '%s' already defined", name.c_str());
 
    _parameterSlot.insert(std::make_pair(name, _numParameters));
    _symbolNameFromSlot.insert(std::make_pair(_numParameters, name));
@@ -457,9 +458,9 @@ MethodBuilder::DefineParameter(const char *name, TR::IlType *dt)
    }
 
 void
-MethodBuilder::DefineArrayParameter(const char *name, TR::IlType *elementType)
+MethodBuilder::DefineArrayParameter(const std::string &name, TR::IlType *elementType)
    {
-   MB_REPLAY("DefineArrayParameter(\"%s\", %s);", name, REPLAY_TYPE(elementType));
+   MB_REPLAY("DefineArrayParameter(\"%s\", %s);", name.c_str(), REPLAY_TYPE(elementType));
    DefineParameter(name, elementType);
 
    _symbolIsArray.insert(name);
@@ -502,7 +503,7 @@ MethodBuilder::DefineFunction(const std::string  & name,
                               int32_t              numParms,
                               TR::IlType        ** parmTypes)
    {   
-   MB_REPLAY("DefineFunction((const char* const)\"%s\",", name.c_str());
+   MB_REPLAY("DefineFunction((const std::string &)\"%s\",", name.c_str());
    MB_REPLAY("               (const std::string &)\"%s\",", fileName.c_str());
    MB_REPLAY("               (const char* const)\"%s\",", lineNumber);
    MB_REPLAY("               " REPLAY_POINTER_FMT ",", REPLAY_POINTER(entryPoint, name.c_str()));
@@ -532,10 +533,10 @@ MethodBuilder::DefineFunction(const std::string  & name,
 const char *
 MethodBuilder::getSymbolName(int32_t slot)
    {
-   std::map<int32_t, const char *>::iterator it = _symbolNameFromSlot.find(slot);
+   std::map<int32_t, const std::string>::iterator it = _symbolNameFromSlot.find(slot);
    TR_ASSERT_FATAL(it != _symbolNameFromSlot.end(), "No symbol found in slot %d", slot);
 
-   return it->second;
+   return it->second.c_str();
    }
 
 TR::IlType **
@@ -548,12 +549,12 @@ MethodBuilder::getParameterTypes()
    TR::IlType **paramTypesArray = _cachedParameterTypesArray;
    for (int32_t p=0;p < _numParameters;p++)
       {
-      std::map<int32_t, const char *>::iterator symNamesIterator = _symbolNameFromSlot.find(p);
+      std::map<int32_t, const std::string>::iterator symNamesIterator = _symbolNameFromSlot.find(p);
       TR_ASSERT_FATAL(symNamesIterator != _symbolNameFromSlot.end(), "No symbol found in slot %d");
-      const char *name = symNamesIterator->second;
+      const std::string name = symNamesIterator->second;
 
-      std::map<const char *, TR::IlType *, StrComparator>::iterator symTypesIterator = _symbolTypes.find(name);
-      TR_ASSERT_FATAL(symTypesIterator != _symbolTypes.end(), "No matching symbol type for parameter '%s'", name);
+      std::map<const std::string, TR::IlType *>::iterator symTypesIterator = _symbolTypes.find(name);
+      TR_ASSERT_FATAL(symTypesIterator != _symbolTypes.end(), "No matching symbol type for parameter '%s'", name.c_str());
       paramTypesArray[p] = symTypesIterator->second;
       }
 

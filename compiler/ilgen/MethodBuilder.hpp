@@ -93,9 +93,9 @@ class MethodBuilder : public TR::IlBuilder
       }
 
    TR::SymbolReference *lookupSymbol(const char *name);
-   void defineSymbol(const char *name, TR::SymbolReference *v);
-   bool symbolDefined(const char *name);
-   bool isSymbolAnArray(const char * name);
+   void defineSymbol(const std::string &name, TR::SymbolReference *v);
+   bool symbolDefined(const std::string &name);
+   bool isSymbolAnArray(const std::string &name);
 
    TR::ResolvedMethod *lookupFunction(const std::string &name);
 
@@ -116,11 +116,11 @@ class MethodBuilder : public TR::IlBuilder
       }
 
    void DefineName(const std::string &name);
-   void DefineParameter(const char *name, TR::IlType *type);
-   void DefineArrayParameter(const char *name, TR::IlType *dt);
+   void DefineParameter(const std::string &name, TR::IlType *type);
+   void DefineArrayParameter(const std::string &name, TR::IlType *dt);
    void DefineReturnType(TR::IlType *dt);
-   void DefineLocal(const char *name, TR::IlType *dt);
-   void DefineMemory(const char *name, TR::IlType *dt, void *location);
+   void DefineLocal(const std::string &name, TR::IlType *dt);
+   void DefineMemory(const std::string &name, TR::IlType *dt, void *location);
    void DefineFunction(const std::string  & name,
                        const std::string  & fileName,
                        const char* const    lineNumber,
@@ -179,13 +179,11 @@ class MethodBuilder : public TR::IlBuilder
    TR::IlType                                                 * _returnType;
    int32_t                                                      _numParameters;
 
-   typedef bool (*StrComparator)(const char *, const char*);
-
-   std::map<const char *, int32_t, StrComparator>               _parameterSlot;
-   std::map<const char *, TR::IlType *, StrComparator>          _symbolTypes;
-   std::map<int32_t, const char *>                              _symbolNameFromSlot;
-   std::set<const char *, StrComparator>                        _symbolIsArray;
-   std::map<const char *, void *, StrComparator>                _memoryLocations;
+   std::map<const std::string, int32_t>                         _parameterSlot;
+   std::map<const std::string, TR::IlType *>                    _symbolTypes;
+   std::map<int32_t, const std::string>                         _symbolNameFromSlot;
+   std::set<std::string>                                        _symbolIsArray;
+   std::map<const std::string, void *>                          _memoryLocations;
 
    typedef std::map<const std::string, TR::ResolvedMethod *>    NameToFunctionMap;
    NameToFunctionMap                                            _functions;
@@ -198,7 +196,7 @@ class MethodBuilder : public TR::IlBuilder
    char                                                         _cachedSignatureArray[100];
 
    // This map should only be accessed inside a compilation via lookupSymbol
-   std::map<const char *, TR::SymbolReference *, StrComparator> _symbols;
+   std::map<const std::string, TR::SymbolReference *>           _symbols;
    bool                                                         _newSymbolsAreTemps;
 
    int32_t                                                      _nextValueID;

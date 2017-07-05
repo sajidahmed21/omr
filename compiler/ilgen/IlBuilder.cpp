@@ -234,14 +234,14 @@ IlBuilder::lookupSymbol(const char *name)
    }
 
 void
-IlBuilder::defineSymbol(const char *name, TR::SymbolReference *symRef)
+IlBuilder::defineSymbol(const std::string &name, TR::SymbolReference *symRef)
    {
    TR_ASSERT(_methodBuilder, "cannot define symbols in an IlBuilder that has no MethodBuilder");
    _methodBuilder->defineSymbol(name, symRef);
    }
 
 void
-IlBuilder::defineValue(const char *name, TR::IlType *type)
+IlBuilder::defineValue(const std::string &name, TR::IlType *type)
    {
    TR::DataType dt = type->getPrimitiveType();
    TR::SymbolReference *newSymRef = symRefTab()->createTemporary(methodSymbol(), dt);

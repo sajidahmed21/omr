@@ -27,7 +27,6 @@
 
 #include <fstream>
 #include <stdarg.h>
-#include <string.h>   // TODO: Remove
 #include <string>
 
 #include "ilgen/IlInjector.hpp"
@@ -436,10 +435,10 @@ protected:
    virtual bool buildIL() { return true; }
 
    TR::SymbolReference *lookupSymbol(const char *name);
-   void defineSymbol(const char *name, TR::SymbolReference *v);
+   void defineSymbol(const std::string &name, TR::SymbolReference *v);
    TR::IlValue *newValue(TR::IlType *dt, TR::Node *n=NULL);
    TR::IlValue *newValue(TR::DataType dt, TR::Node *n=NULL);
-   void defineValue(const char *name, TR::IlType *dt);
+   void defineValue(const std::string &name, TR::IlType *dt);
 
    TR::Node *loadValue(TR::IlValue *v);
    void storeNode(TR::SymbolReference *symRef, TR::Node *v);
