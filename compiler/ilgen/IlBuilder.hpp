@@ -205,8 +205,8 @@ public:
    void StoreOver(TR::IlValue *dest, TR::IlValue *value);
    TR::IlValue *LoadAt(TR::IlType *dt, TR::IlValue *address);
    void StoreAt(TR::IlValue *address, TR::IlValue *value);
-   TR::IlValue *LoadIndirect(const std::string &type, const char *field, TR::IlValue *object);
-   void StoreIndirect(const std::string &type, const char *field, TR::IlValue *object, TR::IlValue *value);
+   TR::IlValue *LoadIndirect(const std::string &type, const std::string &field, TR::IlValue *object);
+   void StoreIndirect(const std::string &type, const std::string &field, TR::IlValue *object, TR::IlValue *value);
    TR::IlValue *IndexAt(TR::IlType *dt, TR::IlValue *base, TR::IlValue *index);
    TR::IlValue *AtomicAddWithOffset(TR::IlValue *baseAddress, TR::IlValue *offset, TR::IlValue *value);
    TR::IlValue *AtomicAdd(TR::IlValue *baseAddress, TR::IlValue * value);
@@ -221,8 +221,8 @@ public:
     * is to use the field's address instead. This is not an elegent solution and
     * should be revisited.
     */
-   TR::IlValue *StructFieldInstanceAddress(const std::string &structName, const char* fieldName, TR::IlValue* obj);
-   TR::IlValue *UnionFieldInstanceAddress(const std::string &unionName, const char* fieldName, TR::IlValue* obj);
+   TR::IlValue *StructFieldInstanceAddress(const std::string &structName, const std::string &fieldName, TR::IlValue* obj);
+   TR::IlValue *UnionFieldInstanceAddress(const std::string &unionName, const std::string &fieldName, TR::IlValue* obj);
 
    // vector memory
    TR::IlValue *VectorLoad(const char *name);

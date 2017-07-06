@@ -167,7 +167,7 @@ public:
     * This method can only be called after a call to `DefineStruct` and
     * before a call to `CloseStruct` with the same `structName`.
     */
-   void DefineField(const std::string &structName, const char *fieldName, TR::IlType *type, size_t offset);
+   void DefineField(const std::string &structName, const std::string &fieldName, TR::IlType *type, size_t offset);
 
    /**
     * @brief Define a member of a new structure type
@@ -184,7 +184,7 @@ public:
     * This method can only be called after a call to `DefineStruct` and
     * before a call to `CloseStruct` with the same `structName`.
     */
-   void DefineField(const std::string &structName, const char *fieldName, TR::IlType *type);
+   void DefineField(const std::string &structName, const std::string &fieldName, TR::IlType *type);
 
    /**
     * @brief End definition of a new structure type
@@ -210,7 +210,7 @@ public:
     */
    void CloseStruct(const std::string &structName);
 
-   TR::IlType * GetFieldType(const std::string &structName, const char *fieldName);
+   TR::IlType * GetFieldType(const std::string &structName, const std::string &fieldName);
 
    /**
     * @brief Returns the offset of a field in a struct
@@ -218,12 +218,12 @@ public:
     * @param fieldName the name of the field in the struct
     * @return the memory offset of the field in bytes
     */
-   size_t OffsetOf(const std::string &structName, const char *fieldName);
+   size_t OffsetOf(const std::string &structName, const std::string &fieldName);
 
    TR::IlType * DefineUnion(const std::string &unionName);
-   void UnionField(const std::string &unionName, const char *fieldName, TR::IlType *type);
+   void UnionField(const std::string &unionName, const std::string &fieldName, TR::IlType *type);
    void CloseUnion(const std::string &unionName);
-   TR::IlType * UnionFieldType(const std::string &unionName, const char *fieldName);
+   TR::IlType * UnionFieldType(const std::string &unionName, const std::string &fieldName);
 
    TR::IlType *PrimitiveType(TR::DataType primitiveType)
       {
@@ -236,7 +236,7 @@ public:
    TR::IlType *PointerTo(const std::string &structName);
    TR::IlType *PointerTo(TR::DataType baseType)  { return PointerTo(_primitiveType[baseType]); }
 
-   TR::IlReference *FieldReference(const std::string &typeName, const char *fieldName);
+   TR::IlReference *FieldReference(const std::string &typeName, const std::string &fieldName);
    TR_Memory *trMemory() { return _trMemory; }
 
    //TR::IlReference *ArrayReference(TR::IlType *arrayType);
