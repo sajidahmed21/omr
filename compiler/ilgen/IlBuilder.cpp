@@ -21,6 +21,7 @@
 #include <stdint.h>
 #include <stdarg.h>
 #include <string.h>
+#include <sstream>
 #include "codegen/CodeGenerator.hpp"
 #include "compile/Compilation.hpp"
 #include "compile/Method.hpp"
@@ -54,7 +55,7 @@
 #define ILB_REPLAY(...)	     { REPLAY({sprintf(_rpLine, ##__VA_ARGS__); (*_rpILCpp) << "\t" << _rpLine << std::endl;}) }
 #define REPLAY_VALUE(v)      ((v)->getSymbol()->getAutoSymbol()->getName())
 #define REPLAY_TYPE(t)       ((t)->getName())
-#define REPLAY_BUILDER(b)    ((b)->getName())
+#define REPLAY_BUILDER(b)    ((b)->getName().c_str())
 #define REPLAY_BOOL(b)       ( b? "true" : "false")
 
 
@@ -162,12 +163,14 @@ IlBuilder::setupForBuildIL()
    }
 
 
-char *
+std::string
 IlBuilder::getName()
    {
    if (!_haveReplayName)
       {
-      sprintf(_replayName, "B_%p", this);
+      std::stringstream stream;
+      stream << "B_" << static_cast<const void *>(this);
+      _replayName = stream.str();
       _haveReplayName = true;
       }
    return _replayName;

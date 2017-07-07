@@ -119,7 +119,7 @@ public:
 
    virtual bool isBytecodeBuilder()             { return false; }
 
-   char *getName();
+   std::string getName();
 
    void print(const char *title, bool recurse=false);
    void printBlock(TR::Block *block);
@@ -424,7 +424,7 @@ protected:
    /**
     * @brief part of experimental "replay" support; the name of the replay file name
     */
-   char                          _replayName[21];
+   std::string                   _replayName;
 
    /**
     * @brief part of experimental "replay" support: character array used to assemble each line of output
