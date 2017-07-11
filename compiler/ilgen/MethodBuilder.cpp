@@ -101,7 +101,6 @@ MethodBuilder::MethodBuilder(TR::TypeDictionary *types, OMR::VirtualMachineState
    _memoryLocations(str_comparator, *_memoryRegion),
    _functions(str_comparator, *_memoryRegion),
    _cachedParameterTypes(0),
-   _cachedSignature(0),
    _definingFile(""),
    _newSymbolsAreTemps(false),
    _nextValueID(0),
