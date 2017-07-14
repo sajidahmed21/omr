@@ -34,6 +34,7 @@
 
 #include "map"
 #include "ilgen/IlBuilder.hpp"
+#include "env/TypedAllocator.hpp"
 
 class TR_Memory;
 
@@ -422,7 +423,8 @@ protected:
 
    typedef bool (*StrComparator)(const char *, const char *);
 
-   std::map<const char *, OMR::StructType *, StrComparator> _structsByName;
+   typedef TR::typed_allocator<std::pair<const char *, OMR::StructType *>, TR::Region &> StructMapAllocator;
+   std::map<const char *, OMR::StructType *, StrComparator, StructMapAllocator> _structsByName;
    typedef std::map<const char *, OMR::StructType *, StrComparator>::iterator StructIterator;
 
    std::map<const char *, OMR::UnionType *, StrComparator>  _unionsByName;
