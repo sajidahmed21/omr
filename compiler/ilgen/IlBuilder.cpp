@@ -230,10 +230,10 @@ IlBuilder::printBlock(TR::Block *block)
    }
 
 TR::SymbolReference *
-IlBuilder::lookupSymbol(const char *name)
+IlBuilder::lookupSymbol(const std::string &name)
    {
    TR_ASSERT(_methodBuilder, "cannot look up symbols in an IlBuilder that has no MethodBuilder");
-   return _methodBuilder->lookupSymbol(name);
+   return _methodBuilder->lookupSymbol(name.c_str());
    }
 
 void
@@ -613,15 +613,15 @@ IlBuilder::indirectLoadNode(TR::IlType *dt, TR::Node *addr, bool isVectorLoad)
  * @param value IlValue that should be written to the local variable, which should be the same data type
  */
 void
-IlBuilder::Store(const char *varName, TR::IlValue *value)
+IlBuilder::Store(const std::string &varName, TR::IlValue *value)
    {
-   ILB_REPLAY("%s->Store(\"%s\", %s);", REPLAY_BUILDER(this), varName, REPLAY_VALUE(value));
+   ILB_REPLAY("%s->Store(\"%s\", %s);", REPLAY_BUILDER(this), varName.c_str(), REPLAY_VALUE(value));
 
    if (!_methodBuilder->symbolDefined(varName))
       _methodBuilder->defineValue(varName, _types->PrimitiveType(value->getDataType()));
    TR::SymbolReference *symRef = lookupSymbol(varName);
 
-   TraceIL("IlBuilder[ %p ]::Store %s %d gets %d\n", this, varName, symRef->getCPIndex(), value->getID());
+   TraceIL("IlBuilder[ %p ]::Store %s %d gets %d\n", this, varName.c_str(), symRef->getCPIndex(), value->getID());
    storeNode(symRef, loadValue(value));
    }
 
@@ -645,9 +645,9 @@ IlBuilder::StoreOver(TR::IlValue *dest, TR::IlValue *value)
  * @param value IlValue with the vector data that should be written to the local variable, and should have the same data type
  */
 void
-IlBuilder::VectorStore(const char *varName, TR::IlValue *value)
+IlBuilder::VectorStore(const std::string &varName, TR::IlValue *value)
    {
-   ILB_REPLAY("%s->VectorStore(\"%s\", %s);", REPLAY_BUILDER(this), varName, REPLAY_VALUE(value));
+   ILB_REPLAY("%s->VectorStore(\"%s\", %s);", REPLAY_BUILDER(this), varName.c_str(), REPLAY_VALUE(value));
 
    TR::Node *valueNode = loadValue(value);
    TR::DataType dt = valueNode->getDataType();
@@ -661,7 +661,7 @@ IlBuilder::VectorStore(const char *varName, TR::IlValue *value)
       _methodBuilder->defineValue(varName, _types->PrimitiveType(dt));
    TR::SymbolReference *symRef = lookupSymbol(varName);
 
-   TraceIL("IlBuilder[ %p ]::VectorStore %s %d gets %d\n", this, varName, symRef->getCPIndex(), value->getID());
+   TraceIL("IlBuilder[ %p ]::VectorStore %s %d gets %d\n", this, varName.c_str(), symRef->getCPIndex(), value->getID());
    storeNode(symRef, loadValue(value));
    }
 
@@ -755,7 +755,7 @@ IlBuilder::StoreIndirect(const std::string &type, const std::string &field, TR::
   }
 
 TR::IlValue *
-IlBuilder::Load(const char *name)
+IlBuilder::Load(const std::string &name)
    {
    TR::SymbolReference *symRef = lookupSymbol(name);
    TR::Node *valueNode = TR::Node::createLoad(symRef);
@@ -764,7 +764,7 @@ IlBuilder::Load(const char *name)
    }
 
 TR::IlValue *
-IlBuilder::VectorLoad(const char *name)
+IlBuilder::VectorLoad(const std::string &name)
    {
    TR::SymbolReference *nameSymRef = lookupSymbol(name);
    TR::DataType returnType = nameSymRef->getSymbol()->getDataType();
@@ -772,9 +772,9 @@ IlBuilder::VectorLoad(const char *name)
 
    TR::Node *loadNode = TR::Node::createWithSymRef(0, TR::comp()->il.opCodeForDirectLoad(returnType), 0, nameSymRef);
    TR::IlValue *returnValue = newValue(returnType, loadNode);
-   TraceIL("IlBuilder[ %p ]::%d is VectorLoad %s (%d)\n", this, returnValue->getID(), name, nameSymRef->getCPIndex());
+   TraceIL("IlBuilder[ %p ]::%d is VectorLoad %s (%d)\n", this, returnValue->getID(), name.c_str(), nameSymRef->getCPIndex());
 
-   ILB_REPLAY("%s = %s->Load(\"%s\");", REPLAY_VALUE(returnValue), REPLAY_BUILDER(this), name)
+   ILB_REPLAY("%s = %s->Load(\"%s\");", REPLAY_VALUE(returnValue), REPLAY_BUILDER(this), name.c_str());
    return returnValue;
    }
 

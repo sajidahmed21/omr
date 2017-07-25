@@ -200,8 +200,8 @@ public:
    // memory
    TR::IlValue *CreateLocalArray(int32_t numElements, TR::IlType *elementType);
    TR::IlValue *CreateLocalStruct(TR::IlType *structType);
-   TR::IlValue *Load(const char *name);
-   void Store(const char *name, TR::IlValue *value);
+   TR::IlValue *Load(const std::string &name);
+   void Store(const std::string &name, TR::IlValue *value);
    void StoreOver(TR::IlValue *dest, TR::IlValue *value);
    TR::IlValue *LoadAt(TR::IlType *dt, TR::IlValue *address);
    void StoreAt(TR::IlValue *address, TR::IlValue *value);
@@ -225,9 +225,9 @@ public:
    TR::IlValue *UnionFieldInstanceAddress(const std::string &unionName, const std::string &fieldName, TR::IlValue* obj);
 
    // vector memory
-   TR::IlValue *VectorLoad(const char *name);
+   TR::IlValue *VectorLoad(const std::string &name);
    TR::IlValue *VectorLoadAt(TR::IlType *dt, TR::IlValue *address);
-   void VectorStore(const char *name, TR::IlValue *value);
+   void VectorStore(const std::string &name, TR::IlValue *value);
    void VectorStoreAt(TR::IlValue *address, TR::IlValue *value);
 
    // control
@@ -434,7 +434,7 @@ protected:
 
    virtual bool buildIL() { return true; }
 
-   TR::SymbolReference *lookupSymbol(const char *name);
+   TR::SymbolReference *lookupSymbol(const std::string &name);
    void defineSymbol(const std::string &name, TR::SymbolReference *v);
    TR::IlValue *newValue(TR::IlType *dt, TR::Node *n=NULL);
    TR::IlValue *newValue(TR::DataType dt, TR::Node *n=NULL);
