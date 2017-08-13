@@ -30,8 +30,10 @@
 #include <map>
 #include <set>
 #include <fstream>
-#include "ilgen/IlBuilder.hpp"
+#include "env/Region.hpp"
 #include "env/TypedAllocator.hpp"
+#include "env/SystemSegmentProvider.hpp"
+#include "ilgen/IlBuilder.hpp"
 
 // Maximum length of _definingLine string (including null terminator)
 #define MAX_LINE_NUM_LEN 7
@@ -177,9 +179,8 @@ class MethodBuilder : public TR::IlBuilder
    virtual bool connectTrees();
 
    private:
-   TR::SegmentProvider *_segmentProvider;
-   TR::Region *_memoryRegion;
-   TR_Memory *_trMemory;
+   TR::SystemSegmentProvider _segmentProvider;
+   TR::Region _memoryRegion;
 
    // These values are typically defined outside of a compilation
    const char                * _methodName;

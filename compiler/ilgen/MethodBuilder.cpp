@@ -22,9 +22,7 @@
 #include <stdint.h>
 #include "compile/Method.hpp"
 #include "env/FrontEnd.hpp"
-#include "env/Region.hpp"
-#include "env/SystemSegmentProvider.hpp"
-#include "env/TRMemory.hpp"
+
 #include "il/Block.hpp"
 #include "il/Node.hpp"
 #include "il/Node_inlines.hpp"
@@ -87,19 +85,18 @@ namespace OMR
 
 MethodBuilder::MethodBuilder(TR::TypeDictionary *types, OMR::VirtualMachineState *vmState)
    : TR::IlBuilder(asMethodBuilder(), types),
-   _segmentProvider(static_cast<TR::SegmentProvider *>(new(TR::Compiler->persistentAllocator()) TR::SystemSegmentProvider(MEM_SEGMENT_SIZE, TR::Compiler->rawAllocator))),
-   _memoryRegion(new(TR::Compiler->persistentAllocator()) TR::Region(*_segmentProvider, TR::Compiler->rawAllocator)),
-   _trMemory(new(TR::Compiler->persistentAllocator()) TR_Memory(*::trPersistentMemory, *_memoryRegion)),
+   _segmentProvider(MEM_SEGMENT_SIZE, TR::Compiler->rawAllocator),
+   _memoryRegion(TR::Region(_segmentProvider, TR::Compiler->rawAllocator)),
    _methodName("NoName"),
    _returnType(NoType),
    _numParameters(0),
-   _symbols(str_comparator, *_memoryRegion),
-   _parameterSlot(str_comparator, *_memoryRegion),
-   _symbolTypes(str_comparator, *_memoryRegion),
-   _symbolNameFromSlot(std::less<int32_t>(), *_memoryRegion),
-   _symbolIsArray(str_comparator, *_memoryRegion),
-   _memoryLocations(str_comparator, *_memoryRegion),
-   _functions(str_comparator, *_memoryRegion),
+   _symbols(str_comparator, _memoryRegion),
+   _parameterSlot(str_comparator, _memoryRegion),
+   _symbolTypes(str_comparator, _memoryRegion),
+   _symbolNameFromSlot(std::less<int32_t>(), _memoryRegion),
+   _symbolIsArray(str_comparator, _memoryRegion),
+   _memoryLocations(str_comparator, _memoryRegion),
+   _functions(str_comparator, _memoryRegion),
    _cachedParameterTypes(0),
    _definingFile(""),
    _newSymbolsAreTemps(false),
@@ -144,24 +141,7 @@ MethodBuilder::MethodBuilder(TR::TypeDictionary *types, OMR::VirtualMachineState
 
 MethodBuilder::MethodBuilder(const MethodBuilder &src) = default;
 
-MethodBuilder::~MethodBuilder()
-   {
-   // Clear map contents before destroying the memory region to avoid dangling references
-   _symbols.clear();
-   _parameterSlot.clear();
-   _symbolTypes.clear();
-   _symbolNameFromSlot.clear();
-   _symbolIsArray.clear();
-   _memoryLocations.clear();
-   _functions.clear();
-
-   _trMemory->~TR_Memory();
-   ::operator delete(_trMemory, TR::Compiler->persistentAllocator());
-   _memoryRegion->~Region();
-   ::operator delete(_memoryRegion, TR::Compiler->persistentAllocator());
-   static_cast<TR::SystemSegmentProvider *>(_segmentProvider)->~SystemSegmentProvider();
-   ::operator delete(_segmentProvider, TR::Compiler->persistentAllocator());
-   }
+MethodBuilder::~MethodBuilder() { }
 
 TR::MethodBuilder *
 MethodBuilder::asMethodBuilder()
@@ -553,7 +533,7 @@ MethodBuilder::DefineFunction(const char* const name,
       }   
    MB_REPLAY(");");
 
-   TR::ResolvedMethod *method = new (*_memoryRegion) TR::ResolvedMethod((char*)fileName,
+   TR::ResolvedMethod *method = new (_memoryRegion) TR::ResolvedMethod((char*)fileName,
                                                                         (char*)lineNumber,
                                                                         (char*)name,
                                                                         numParms,

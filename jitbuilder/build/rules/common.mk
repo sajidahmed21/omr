@@ -42,6 +42,9 @@ JITBUILDER_TARBALL=jitbuilder.tgz
 
 jitbuilder: $(JITBUILDER_TARBALL)
 
+$(RELEASE_INCLUDE)/$(JIT_OMR_DIRTY_DIR)/compile:
+	mkdir -p $(RELEASE_INCLUDE)/$(JIT_OMR_DIRTY_DIR)/compile
+
 $(RELEASE_INCLUDE)/$(JIT_OMR_DIRTY_DIR)/env:
 	mkdir -p $(RELEASE_INCLUDE)/$(JIT_OMR_DIRTY_DIR)/env
 
@@ -51,10 +54,34 @@ $(RELEASE_INCLUDE)/$(JIT_OMR_DIRTY_DIR)/il:
 $(RELEASE_INCLUDE)/$(JIT_OMR_DIRTY_DIR)/ilgen:
 	mkdir -p $(RELEASE_INCLUDE)/$(JIT_OMR_DIRTY_DIR)/ilgen
 
+$(RELEASE_INCLUDE)/$(JIT_OMR_DIRTY_DIR)/infra:
+	mkdir -p $(RELEASE_INCLUDE)/$(JIT_OMR_DIRTY_DIR)/infra
+
+$(RELEASE_INCLUDE)/$(JIT_OMR_DIRTY_DIR)/compile/CompilationException.hpp: $(FIXED_SRCBASE)/$(JIT_OMR_DIRTY_DIR)/compile/CompilationException.hpp $(RELEASE_INCLUDE)/$(JIT_OMR_DIRTY_DIR)/compile
+	cp $< $@ || cp $< $@
+
 $(RELEASE_INCLUDE)/$(JIT_OMR_DIRTY_DIR)/env/jittypes.h: $(FIXED_SRCBASE)/$(JIT_OMR_DIRTY_DIR)/env/jittypes.h $(RELEASE_INCLUDE)/$(JIT_OMR_DIRTY_DIR)/env
 	cp $< $@ || cp $< $@
 
 $(RELEASE_INCLUDE)/$(JIT_OMR_DIRTY_DIR)/env/defines.h: $(FIXED_SRCBASE)/$(JIT_OMR_DIRTY_DIR)/env/defines.h $(RELEASE_INCLUDE)/$(JIT_OMR_DIRTY_DIR)/env
+	cp $< $@ || cp $< $@
+
+$(RELEASE_INCLUDE)/$(JIT_OMR_DIRTY_DIR)/env/MemorySegment.hpp: $(FIXED_SRCBASE)/$(JIT_OMR_DIRTY_DIR)/env/MemorySegment.hpp $(RELEASE_INCLUDE)/$(JIT_OMR_DIRTY_DIR)/env
+	cp $< $@ || cp $< $@
+
+$(RELEASE_INCLUDE)/$(JIT_OMR_DIRTY_DIR)/env/RawAllocator.hpp: $(FIXED_SRCBASE)/$(JIT_OMR_DIRTY_DIR)/env/RawAllocator.hpp $(RELEASE_INCLUDE)/$(JIT_OMR_DIRTY_DIR)/env
+	cp $< $@ || cp $< $@
+
+$(RELEASE_INCLUDE)/$(JIT_OMR_DIRTY_DIR)/env/Region.hpp: $(FIXED_SRCBASE)/$(JIT_OMR_DIRTY_DIR)/env/Region.hpp $(RELEASE_INCLUDE)/$(JIT_OMR_DIRTY_DIR)/env
+	cp $< $@ || cp $< $@
+
+$(RELEASE_INCLUDE)/$(JIT_OMR_DIRTY_DIR)/env/SegmentAllocator.hpp: $(FIXED_SRCBASE)/$(JIT_OMR_DIRTY_DIR)/env/SegmentAllocator.hpp $(RELEASE_INCLUDE)/$(JIT_OMR_DIRTY_DIR)/env
+	cp $< $@ || cp $< $@
+
+$(RELEASE_INCLUDE)/$(JIT_OMR_DIRTY_DIR)/env/SegmentProvider.hpp: $(FIXED_SRCBASE)/$(JIT_OMR_DIRTY_DIR)/env/SegmentProvider.hpp $(RELEASE_INCLUDE)/$(JIT_OMR_DIRTY_DIR)/env
+	cp $< $@ || cp $< $@
+
+$(RELEASE_INCLUDE)/$(JIT_OMR_DIRTY_DIR)/env/SystemSegmentProvider.hpp: $(FIXED_SRCBASE)/$(JIT_OMR_DIRTY_DIR)/env/SystemSegmentProvider.hpp $(RELEASE_INCLUDE)/$(JIT_OMR_DIRTY_DIR)/env
 	cp $< $@ || cp $< $@
 
 $(RELEASE_INCLUDE)/$(JIT_OMR_DIRTY_DIR)/env/TypedAllocator.hpp: $(FIXED_SRCBASE)/$(JIT_OMR_DIRTY_DIR)/env/TypedAllocator.hpp $(RELEASE_INCLUDE)/$(JIT_OMR_DIRTY_DIR)/env
@@ -120,9 +147,25 @@ $(RELEASE_INCLUDE)/$(JIT_OMR_DIRTY_DIR)/ilgen/VirtualMachineOperandStack.hpp: $(
 $(RELEASE_INCLUDE)/$(JIT_OMR_DIRTY_DIR)/ilgen/IlGen.hpp: $(FIXED_SRCBASE)/$(JIT_OMR_DIRTY_DIR)/ilgen/IlGen.hpp $(RELEASE_INCLUDE)/$(JIT_OMR_DIRTY_DIR)/ilgen
 	cp $< $@ || cp $< $@
 
+$(RELEASE_INCLUDE)/$(JIT_OMR_DIRTY_DIR)/infra/Annotations.hpp: $(FIXED_SRCBASE)/$(JIT_OMR_DIRTY_DIR)/infra/Annotations.hpp $(RELEASE_INCLUDE)/$(JIT_OMR_DIRTY_DIR)/infra
+	cp $< $@ || cp $< $@
+
+$(RELEASE_INCLUDE)/$(JIT_OMR_DIRTY_DIR)/infra/Assert.hpp: $(FIXED_SRCBASE)/$(JIT_OMR_DIRTY_DIR)/infra/Assert.hpp $(RELEASE_INCLUDE)/$(JIT_OMR_DIRTY_DIR)/infra
+	cp $< $@ || cp $< $@
+
+$(RELEASE_INCLUDE)/$(JIT_OMR_DIRTY_DIR)/infra/ReferenceWrapper.hpp: $(FIXED_SRCBASE)/$(JIT_OMR_DIRTY_DIR)/infra/ReferenceWrapper.hpp $(RELEASE_INCLUDE)/$(JIT_OMR_DIRTY_DIR)/infra
+	cp $< $@ || cp $< $@
+
 JITBUILDER_FILES=$(RELEASE_DIR)/Makefile \
+             $(RELEASE_INCLUDE)/$(JIT_OMR_DIRTY_DIR)/compile/CompilationException.hpp \
              $(RELEASE_INCLUDE)/$(JIT_OMR_DIRTY_DIR)/env/defines.h \
              $(RELEASE_INCLUDE)/$(JIT_OMR_DIRTY_DIR)/env/jittypes.h \
+             $(RELEASE_INCLUDE)/$(JIT_OMR_DIRTY_DIR)/env/MemorySegment.hpp \
+             $(RELEASE_INCLUDE)/$(JIT_OMR_DIRTY_DIR)/env/RawAllocator.hpp \
+             $(RELEASE_INCLUDE)/$(JIT_OMR_DIRTY_DIR)/env/Region.hpp \
+             $(RELEASE_INCLUDE)/$(JIT_OMR_DIRTY_DIR)/env/SegmentAllocator.hpp \
+             $(RELEASE_INCLUDE)/$(JIT_OMR_DIRTY_DIR)/env/SegmentProvider.hpp \
+             $(RELEASE_INCLUDE)/$(JIT_OMR_DIRTY_DIR)/env/SystemSegmentProvider.hpp \
              $(RELEASE_INCLUDE)/$(JIT_OMR_DIRTY_DIR)/env/TypedAllocator.hpp \
              $(RELEASE_INCLUDE)/$(JIT_OMR_DIRTY_DIR)/il/DataTypes.hpp \
              $(RELEASE_INCLUDE)/$(JIT_OMR_DIRTY_DIR)/il/DataTypesEnum.hpp \
@@ -144,6 +187,9 @@ JITBUILDER_FILES=$(RELEASE_DIR)/Makefile \
              $(RELEASE_INCLUDE)/$(JIT_OMR_DIRTY_DIR)/ilgen/VirtualMachineOperandArray.hpp \
              $(RELEASE_INCLUDE)/$(JIT_OMR_DIRTY_DIR)/ilgen/VirtualMachineOperandStack.hpp \
              $(RELEASE_INCLUDE)/$(JIT_OMR_DIRTY_DIR)/ilgen/IlGen.hpp \
+             $(RELEASE_INCLUDE)/$(JIT_OMR_DIRTY_DIR)/infra/Annotations.hpp \
+             $(RELEASE_INCLUDE)/$(JIT_OMR_DIRTY_DIR)/infra/Assert.hpp \
+             $(RELEASE_INCLUDE)/$(JIT_OMR_DIRTY_DIR)/infra/ReferenceWrapper.hpp \
              $(RELEASE_SRC)/Call.hpp \
              $(RELEASE_SRC)/Call.cpp \
              $(RELEASE_SRC)/DotProduct.hpp \
